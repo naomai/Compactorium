@@ -1,0 +1,17 @@
+{
+    "name": "naomai/compactorium",
+    "require": {
+        "delight-im/auth": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Naomai\\Compactorium\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "naomai",
+            "email": "lulu@nieznani-sprawcy.pl"
+        }
+    ]
+}
