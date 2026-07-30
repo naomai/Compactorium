@@ -6,6 +6,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 Config::init();
 Database::init();
+Migration::init();
+Migration::run();
 Http\Client::init();
 Services\CoverArtArchive::init();
 
