@@ -2,6 +2,11 @@
     namespace Naomai\Compactorium;
     class Request {
         protected array $request;
+        public static string $method;
+
+        public static function init() : void {
+            self::$method = $_SERVER['REQUEST_METHOD'];
+        }
 
         public function __construct(array $requestContent) {
             $this->request = $requestContent;
@@ -41,7 +46,7 @@
         }
 
         public static function post() : self {
-            if($_SERVER['REQUEST_METHOD'] != "POST") {
+            if(self::$method != "POST") {
                 throw new \Exception("Invalid request method");
             }
 
