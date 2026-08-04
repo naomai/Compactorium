@@ -56,38 +56,7 @@
         $(document).ready(()=>{
             initScanner();
         });
-/*
-        $(document).ready(()=>{
-            Quagga.init({
-                inputStream : {
-                    name : "Live",
-                    type : "LiveStream",
-                    target: document.querySelector('#yourElement')
-                },
-                constraints:{
-                    video: {
-                        mandatory: {
-                            minWidth: 1280,
-                            minHeight: 720
-                        }
-                    }
-                },
-                decoder : {
-                    readers : ["ean_reader", "ean_8_reader"]
-                }
-            }, function(err) {
-                if (err) {
-                    console.log(err);
-                    return
-                }
-                console.log("Initialization finished. Ready to start");
-                Quagga.start();
-            });
 
-            Quagga.onDetected((data)=>{
-                $("#dbg").text(`code:${data.codeResult.code} conf:${bcdGetError(data)}`);
-            });
-        });*/
 
         function bcdGetError(resullt) {
             // https://github.com/serratus/quaggaJS/issues/237#issue-270285902
