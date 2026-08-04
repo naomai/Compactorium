@@ -1,0 +1,43 @@
+	body, table{
+		--tool-accent: #000;
+		--tool-stroke-color: oklch(from var(--tool-accent) 0.3 c h);
+		--tool-control-bg: oklch(from var(--tool-accent) 1 min(l, 0.07) h);
+		font-family: tahoma;
+		font-size: 8pt;
+		color: oklch(from var(--tool-accent) 0.3 c h);
+	}
+	
+	table{
+		border: 1pt solid black;
+		border-collapse: collapse;
+		margin-bottom: 14px;
+		page-break-inside: auto;
+	}
+    tr {
+		page-break-inside:avoid; 
+		page-break-after:auto;
+	}
+    thead { 
+		display:table-header-group;
+	}
+	
+	th, td{
+		padding: 3px;
+		height: 32px;
+	}
+	
+	a, a:visited{
+		color: #046a77;
+
+	}
+
+	a:hover {
+		text-decoration: none;
+	}
+
+	input, textarea {
+		color: var(--tool-stroke-color);
+		background-color: var(--tool-control-bg);
+		border-color: var(--tool-stroke-color);
+
+	}
