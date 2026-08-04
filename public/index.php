@@ -1,3 +1,16 @@
+<?php
+    namespace Naomai\Compactorium;
+
+    require __DIR__ . '/../bootstrap/app.php';
+
+    $db = Database::connection();
+
+    $libraryId = 0;
+    $stm = $db->prepare("SELECT * FROM `scans` WHERE `library_id`=:library_id");
+    $stm->execute(['library_id'=>$libraryId]);
+    $barcodes = $stm->fetchAll(\PDO::FETCH_ASSOC);
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +25,7 @@
     <title>Compactorium</title>
 
 <script>
-    const barcodes = [];
+    let barcodes = <?=json_encode($barcodes)?>;
     let lastBcd = null;
     const hints = new Map();
     hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
@@ -46,7 +59,7 @@
                         return;
                     }
                     lastBcd = bcd;
-                    barcodes.push(bcd);
+                    //barcodes.push({barcode:bcd});
                     bcdScanned(bcd);
                     $("#dbg").text(`code:${bcd} len:${barcodes.length}`);
                 }
@@ -55,6 +68,7 @@
 
         $(document).ready(()=>{
             initScanner();
+			reloadView();
         });
 
 
@@ -76,8 +90,8 @@
             sendBcd(bcd);
         }
 
-        function sendBcd(bcd) {
-            fetch("api/scan.php", {
+       async function sendBcd(bcd) {
+            const resp=await fetch("api/scan.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -86,10 +100,15 @@
                     bcd: bcd
                 })
             });
+		   const scanInfo=await resp.json();
+		   let status=scanInfo.hasOwnProperty('barcodes');
+		   $("#dbg").text(`status:${status?'OK ':scanInfo.error}`);
+		   barcodes=scanInfo.barcodes;
+		   reloadView();
         }
 
         function reloadView() {
-            const html = barcodes.reduce((acc,bcd)=>acc + `<p class='bcdScan'>${bcd}</p>\n`, "");
+            const html = barcodes.reduce((acc,bcd)=>acc+`<p class='bcdScan'>${bcd.id} - ${bcd.barcode} ${bcd.scanned_at}</p>\n`, "");
             $("#list").html(html);
         }
     </script>
@@ -97,9 +116,7 @@
 <body>
     <div id="dbg"></div>
     <div id="scanner"></div>
-    <div id="list">
-        
-    </div>
+    <div id="list"></div>
 
 </body>
 </html>
