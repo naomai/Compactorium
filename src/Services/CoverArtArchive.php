@@ -1,8 +1,8 @@
 <?php
 namespace Naomai\Compactorium\Services;
 
-use Exception;
 use Naomai\Compactorium\Http\Client;
+use Naomai\Compactorium\Logger;
 
 class CoverArtArchive {
     private static string $storagePath;
@@ -16,16 +16,12 @@ class CoverArtArchive {
     }
 
     public static function getReleaseFrontCover(object $mbReleaseData) : ?string {
-        if(property_exists($mbReleaseData, 'error')) {
-            throw new Exception("CoverArtArchive error: {$mbReleaseData->error}");
-        }
+        
+        
+        $releaseId = $mbReleaseData->releaseId;
+        $releaseGroupId = $mbReleaseData->releaseGroupId;
 
-        if($mbReleaseData->count==0){
-            return null;
-        }
-
-        $releaseId = $mbReleaseData->releases[0]->id;
-        $releaseGroupId = $mbReleaseData->releases[0]->{'release-group'}->id;
+        Logger::debug("CoverArtArchive", "get front cover : {$releaseId}");
 
         $outputFile = self::getLocalReleaseFrontCover($releaseId);
         if($outputFile !== null) {
@@ -33,8 +29,6 @@ class CoverArtArchive {
         }
 
         $url = "http://coverartarchive.org/release/" . $releaseId . "/front";
-
-
 
         $frontFile = Client::downloadFile($url);
 
