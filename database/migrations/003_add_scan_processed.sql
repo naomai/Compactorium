@@ -1,0 +1,1 @@
+ALTER TABLE `scans` ADD `processed` BOOL DEFAULT FALSE;
