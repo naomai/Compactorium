@@ -2,6 +2,7 @@
 namespace Naomai\Compactorium\Services;
 
 use Naomai\Compactorium\Http\Client;
+use Naomai\Compactorium\Logger;
 
 class MusicBrainz {
     // functions marked as "blocking" may cause long delays, 
@@ -9,10 +10,13 @@ class MusicBrainz {
     // might reimplement this with promise-like pattern
 
     private static float $lastRequestTime;
-    private const float REQUEST_DELAY_S = 1.0;
+    private static bool $backoff;
+    private const float REQUEST_DELAY_S = 1.1;
+    private const float REQUEST_BACKOFF_S = 5.0;
 
     public static function init() : void {
         self::$lastRequestTime = 0;
+        self::$backoff = false;
     }
 
     public static function GetAlbumByBarcode(string $bcd) : ?object {
@@ -24,15 +28,35 @@ class MusicBrainz {
 
         $url = "https://musicbrainz.org/ws/2/release?" . http_build_query($urlArgs);
 
-        self::RateLimiterWait();
-        $releases = Client::getJson($url);
-        self::RateLimiterCommit();
+        Logger::debug("MusicBrainz", "request url: {$url}");
+        
+        $releases = null;
+
+        do {
+
+            self::RateLimiterWait();
+            try{
+
+                $releases = Client::getJson($url);
+                self::RateLimiterCommit();
+                self::$backoff = Client::getLastRequestInfo()['http_code']==503;
+            } catch(\Exception $e) {
+                if($e->getCode() == CURLE_OPERATION_TIMEDOUT) {
+                    self::RateLimiterCommit();
+                    self::$backoff = true;
+                    Logger::debug("MusicBrainz", "curl timeout");
+
+                }
+            }
+
+        } while (self::$backoff);
 
         if(property_exists($releases, 'error')) {
             throw new \Exception("MusicBrainz error: {$releases->error}");
         }
 
         if($releases->count == 0) {
+            Logger::debug("MusicBrainz", "no releases");
             return null;
         }
 
@@ -51,8 +75,11 @@ class MusicBrainz {
         $currentTime = microtime(true);
         $timePassed = $currentTime - self::$lastRequestTime;
 
-        if($timePassed < self::REQUEST_DELAY_S) {
-            time_sleep_until(self::$lastRequestTime + self::REQUEST_DELAY_S);
+        $delay = self::$backoff ? self::REQUEST_BACKOFF_S : self::REQUEST_DELAY_S;
+
+        if($timePassed < $delay) {
+            Logger::debug("MusicBrainz", "backoff for: {$delay}s");
+            time_sleep_until(self::$lastRequestTime + $delay);
         }
     }
 
