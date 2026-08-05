@@ -2,6 +2,7 @@
 namespace Naomai\Compactorium\Http;
 
 use CurlHandle;
+use Naomai\Compactorium\Logger;
 
 class Client {
     private static string $userAgent;
@@ -29,14 +30,16 @@ class Client {
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
-        
+
+        Logger::debug("Client", "curl configured");
         $response = curl_exec($ch);
+        Logger::debug("Client", "curl request done");
+
         self::setLastRequestInfo($ch);
 
         if ($response === false) {
-            throw new \Exception(curl_error($ch));
+            throw new \Exception(curl_error($ch), curl_errno($ch));
         }
-
 
         $data = json_decode($response);
 
@@ -54,7 +57,10 @@ class Client {
         curl_setopt($ch, CURLOPT_FILE, $fh);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         
+        Logger::debug("Client", "curl configured");
         $response = curl_exec($ch);
+        Logger::debug("Client", "curl request done");
+
         self::setLastRequestInfo($ch);
 
         if ($response === false) {
@@ -65,10 +71,13 @@ class Client {
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if($httpCode > 299) {
+            Logger::debug("Client", "download failed with code {$httpCode}");
+
             unlink($downloadPath);
             return null;
         }
 
+        Logger::debug("Client", "download stored in {$downloadPath}");
         return $downloadPath;
     }
 

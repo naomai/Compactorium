@@ -57,6 +57,9 @@ class CoverArtArchive {
 
         $outputFile = self::$storagePath . "/" . $releaseId . "-front." . $extension;
 
+        Logger::debug("CoverArtArchive", "store downloaded cover  {$releaseId}");
+
+
         rename($frontFile, $outputFile);
 
         return $outputFile;
@@ -69,6 +72,9 @@ class CoverArtArchive {
         if(count($globSearch)==0) {
             return null;
         }
+
+        Logger::debug("CoverArtArchive", "got local cover: {$releaseId}");
+
 
         return $globSearch[0];
 
