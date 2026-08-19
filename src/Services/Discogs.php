@@ -2,21 +2,24 @@
 namespace Naomai\Compactorium\Services;
 
 use Naomai\Compactorium\Http\CurlClient;
+use Naomai\Compactorium\Http\HttpClient;
 use Naomai\Compactorium\Http\RateLimiter;
 use Naomai\Compactorium\Logger;
 
 class Discogs {
-    private static CurlClient $client;
+    private static HttpClient $client;
 
 
     public static function init() : void {
-        self::$client = new CurlClient();
-        self::$client->rateLimiter = new RateLimiter(
+        $client = new CurlClient();
+        $client->rateLimiter = new RateLimiter(
             delay: 1,
             backoffDelay: 10,
             httpRemainingHeader: "x-discogs-ratelimit-remaining",
             httpTooManyRequestsCode: 429
         );
+
+        self::SetHttpClient($client);
     }
 
     public static function SearchBarcode(string $bcd) : ?array {
@@ -77,5 +80,9 @@ class Discogs {
 
         return $master;
 
+    }
+
+    public static function SetHttpClient(HttpClient $client) : void {
+        self::$client = $client;
     }
 }
