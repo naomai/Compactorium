@@ -27,10 +27,12 @@ class ClientContext {
         $this->userAgent = $userAgent;
     }
 
-    public function getJson(string $url) : ?object {
+    public function getJson(string $url, array $headers=[]) : ?object {
         $ch = $this->createConfiguredCurl($url);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, 
+            self::headerListFlatten(['Accept: application/json', ...$headers])
+        );
         Logger::debug("Client", "curl configured");
 
 
@@ -46,7 +48,7 @@ class ClientContext {
         return $data;
     }
 
-    public function downloadFile(string $url) : ?string {
+    public function downloadFile(string $url, array $headers=[]) : ?string {
         $urlHash = hash('sha256', $url);
         $downloadPath = $this->downloadDir . "/" . $urlHash . ".bin";
 
@@ -56,6 +58,9 @@ class ClientContext {
         $ch = $this->createConfiguredCurl($url);
         curl_setopt($ch, CURLOPT_FILE, $fh);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, 
+            self::headerListFlatten([...$headers])
+        );
         Logger::debug("Client", "curl configured");
         
         $response = $this->executeCurl($ch);
@@ -164,6 +169,15 @@ class ClientContext {
          if($this->rateLimiter === null) 
             return true;
         return $this->rateLimiter->hasSucceeded();
+    }
+
+    private static function headerListFlatten(array $headers) : array {
+        return array_map(
+            fn($val, $key) => is_numeric($key) ? $val : "$key: $val",
+            $headers, 
+            array_keys($headers)
+        );
+        
     }
 
 
