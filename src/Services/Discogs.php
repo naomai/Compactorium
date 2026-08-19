@@ -28,7 +28,13 @@ class Discogs {
         $url = "https://api.discogs.com/database/search?" . http_build_query($urlArgs);
 
         Logger::debug("Discogs", "SearchBarcode url: {$url}");
-        $search = self::$client->getJson($url);
+
+        $headers = [];
+        if(isset($_ENV['DISCOGS_KEY']) && isset($_ENV['DISCOGS_SECRET'])) {
+            $headers['Authorization'] = "Discogs key={$_ENV['DISCOGS_KEY']}, secret={$_ENV['DISCOGS_SECRET']}";
+        }
+
+        $search = self::$client->getJson($url, $headers);
 
         if(!property_exists($search, 'results')) {
             throw new \Exception("Discogs error: {$search->message}");
