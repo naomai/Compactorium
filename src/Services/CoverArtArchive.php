@@ -1,18 +1,21 @@
 <?php
 namespace Naomai\Compactorium\Services;
 
-use Naomai\Compactorium\Http\Client;
+use Naomai\Compactorium\Http\ClientContext;
 use Naomai\Compactorium\Logger;
 
 class CoverArtArchive {
     private static string $storagePath;
+    private static ClientContext $client;
 
     public static function init() : void {
         self::$storagePath = $_ENV['BASE_DIR'] . "/storage/covers";
 
-         if(!file_exists(self::$storagePath)) {
+        if(!file_exists(self::$storagePath)) {
             mkdir(directory: self::$storagePath, recursive: true);
         }
+
+        self::$client = new ClientContext();
     }
 
     public static function getReleaseFrontCover(object $mbReleaseData) : ?string {
@@ -30,18 +33,18 @@ class CoverArtArchive {
 
         $url = "http://coverartarchive.org/release/" . $releaseId . "/front";
 
-        $frontFile = Client::downloadFile($url);
+        $frontFile = self::$client->downloadFile($url);
 
         if($frontFile === null) {
             $url = "http://coverartarchive.org/release-group/" . $releaseGroupId . "/front";
-            $frontFile = Client::downloadFile($url);
+            $frontFile = self::$client->downloadFile($url);
         }
 
         if($frontFile === null) {
             return null;
         }
 
-        $mimeType = Client::getLastRequestInfo()['content_type'];
+        $mimeType = self::$client->getLastRequestInfo()['content_type'];
 
         $extension = match($mimeType) {
             'image/jpeg' => 'jpg',
