@@ -8,6 +8,8 @@ class ClientContext {
     private string $userAgent;
     private string $downloadDir;
     private array $lastRequestInfo;
+    private array $lastRequestHeaders;
+    public ?RateLimiter $rateLimiter = null;
 
     public function __construct() {
         $this->setUserAgent(
@@ -28,14 +30,12 @@ class ClientContext {
     public function getJson(string $url) : ?object {
         $ch = $this->createConfiguredCurl($url);
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
-
         Logger::debug("Client", "curl configured");
-        $response = curl_exec($ch);
-        Logger::debug("Client", "curl request done");
 
-        $this->setLastRequestInfo($ch);
+
+        $response = $this->executeCurl($ch);
+
 
         if ($response === false) {
             throw new \Exception(curl_error($ch), curl_errno($ch));
@@ -56,12 +56,9 @@ class ClientContext {
         $ch = $this->createConfiguredCurl($url);
         curl_setopt($ch, CURLOPT_FILE, $fh);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        
         Logger::debug("Client", "curl configured");
-        $response = curl_exec($ch);
-        Logger::debug("Client", "curl request done");
-
-        $this->setLastRequestInfo($ch);
+        
+        $response = $this->executeCurl($ch);
 
         if ($response === false) {
             throw new \Exception(curl_error($ch));
@@ -87,17 +84,86 @@ class ClientContext {
         curl_setopt_array($ch, [
             CURLOPT_USERAGENT => $this->userAgent,
             CURLOPT_TIMEOUT => 10,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADERFUNCTION => [$this, 'passHttpHeader'],
         ]);
 
         return $ch;
+    }
+
+    private function executeCurl(CurlHandle $ch) : string|bool {
+        $response = false;
+        do {
+            try {
+                $this->rateLimiterWait();
+                $this->requestBegin();
+                $response = curl_exec($ch);
+                Logger::debug("Client", "curl request done");
+                $this->setLastRequestInfo($ch);
+                $this->rateLimiterCommit();
+            } catch(\Exception $e) {
+                if($e->getCode() == CURLE_OPERATION_TIMEDOUT) {
+                    $this->rateLimiterCommitFailure();
+                }
+            }
+        } while(!$this->rateLimiterSucceeded());
+        return $response;
     }
 
     private function setLastRequestInfo(CurlHandle $ch) : void {
         $this->lastRequestInfo = curl_getinfo($ch);
     }
 
+    private function requestBegin() : void {
+        $this->lastRequestHeaders = [];
+    }
+
     public function getLastRequestInfo() : array {
         return $this->lastRequestInfo;
+    }
+
+    public function getLastRequestHeaders() : array {
+        return $this->lastRequestHeaders;
+    }
+
+    private function passHttpHeader(CurlHandle $ch, string $row) {
+        if(substr($row, 0, 5) == "HTTP/") {
+            preg_match('/^HTTP\/(\d(?:\.\d)?)\s+(\d{3})/', $row, $m);
+            $this->lastRequestHeaders['HTTP_VERSION'] = $m[1];
+            $this->lastRequestHeaders['HTTP_RESPONSE_CODE'] = (int)$m[2];
+
+        } else {
+            $h = preg_split("/:\s*/", trim($row), 2);
+            if($h) {
+                [$key, $value] = $h;
+                $this->lastRequestHeaders[strtolower($key)] = $value;
+            }
+        }
+        return strlen($row);
+    }
+
+    private function rateLimiterWait() : void {
+        if($this->rateLimiter === null) 
+            return;
+        $this->rateLimiter->wait();        
+    }
+
+    private function rateLimiterCommit() : void {
+        if($this->rateLimiter === null) 
+            return;
+        $this->rateLimiter->commit($this->getLastRequestHeaders());      
+    }
+
+    private function rateLimiterCommitFailure() : void {
+        if($this->rateLimiter === null) 
+            return;
+        $this->rateLimiter->commitFailure();      
+    }
+
+    private function rateLimiterSucceeded() : bool {
+         if($this->rateLimiter === null) 
+            return true;
+        return $this->rateLimiter->hasSucceeded();
     }
 
 

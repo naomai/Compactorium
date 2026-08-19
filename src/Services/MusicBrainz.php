@@ -1,7 +1,8 @@
 <?php
 namespace Naomai\Compactorium\Services;
 
-use Naomai\Compactorium\Http\Client;
+use Naomai\Compactorium\Http\ClientContext;
+use Naomai\Compactorium\Http\RateLimiter;
 use Naomai\Compactorium\Logger;
 
 class MusicBrainz {
@@ -9,14 +10,16 @@ class MusicBrainz {
     // due to rate limiting.
     // might reimplement this with promise-like pattern
 
-    private static float $lastRequestTime;
-    private static bool $backoff;
-    private const float REQUEST_DELAY_S = 1.1;
-    private const float REQUEST_BACKOFF_S = 5.0;
+    private static ClientContext $client;
+
 
     public static function init() : void {
-        self::$lastRequestTime = 0;
-        self::$backoff = false;
+        self::$client = new ClientContext();
+        self::$client->rateLimiter = new RateLimiter(
+            delay: 1.1,
+            httpRemainingHeader: "x-ratelimit-remaining",
+            httpTooManyRequestsCode: 503
+        );
     }
 
     public static function GetAlbumByBarcode(string $bcd) : ?object {
@@ -30,26 +33,8 @@ class MusicBrainz {
 
         Logger::debug("MusicBrainz", "request url: {$url}");
         
-        $releases = null;
+        $releases = self::$client->getJson($url);
 
-        do {
-
-            self::RateLimiterWait();
-            try{
-
-                $releases = Client::getJson($url);
-                self::RateLimiterCommit();
-                self::$backoff = Client::getLastRequestInfo()['http_code']==503;
-            } catch(\Exception $e) {
-                if($e->getCode() == CURLE_OPERATION_TIMEDOUT) {
-                    self::RateLimiterCommit();
-                    self::$backoff = true;
-                    Logger::debug("MusicBrainz", "curl timeout");
-
-                }
-            }
-
-        } while (self::$backoff);
 
         if(property_exists($releases, 'error')) {
             throw new \Exception("MusicBrainz error: {$releases->error}");
@@ -69,22 +54,6 @@ class MusicBrainz {
             'releaseGroupId' => $releaseGroupId
         ];
 
-    }
-
-    private static function RateLimiterWait() : void {
-        $currentTime = microtime(true);
-        $timePassed = $currentTime - self::$lastRequestTime;
-
-        $delay = self::$backoff ? self::REQUEST_BACKOFF_S : self::REQUEST_DELAY_S;
-
-        if($timePassed < $delay) {
-            Logger::debug("MusicBrainz", "backoff for: {$delay}s");
-            time_sleep_until(self::$lastRequestTime + $delay);
-        }
-    }
-
-    private static function RateLimiterCommit() : void {
-        self::$lastRequestTime = microtime(true);
     }
 
     public static function ValidateMbid(string $id) : bool {
