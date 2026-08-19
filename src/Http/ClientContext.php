@@ -105,9 +105,15 @@ class ClientContext {
                 $response = curl_exec($ch);
                 Logger::debug("Client", "curl request done");
                 $this->setLastRequestInfo($ch);
+
+                if(!isset($this->lastRequestHeaders['HTTP_STATUS_CODE'])){
+                    throw new \Exception("Invalid HTTP header", 0x04376001);
+                }
+
+
                 $this->rateLimiterCommit();
             } catch(\Exception $e) {
-                if($e->getCode() == CURLE_OPERATION_TIMEDOUT) {
+                if($e->getCode() == CURLE_OPERATION_TIMEDOUT || $e->getCode() == 0x04376001) {
                     $this->rateLimiterCommitFailure();
                 }
             }
@@ -135,11 +141,11 @@ class ClientContext {
         if(substr($row, 0, 5) == "HTTP/") {
             preg_match('/^HTTP\/(\d(?:\.\d)?)\s+(\d{3})/', $row, $m);
             $this->lastRequestHeaders['HTTP_VERSION'] = $m[1];
-            $this->lastRequestHeaders['HTTP_RESPONSE_CODE'] = (int)$m[2];
+            $this->lastRequestHeaders['HTTP_STATUS_CODE'] = (int)$m[2];
 
         } else {
             $h = preg_split("/:\s*/", trim($row), 2);
-            if($h) {
+            if($h && count($h)==2) {
                 [$key, $value] = $h;
                 $this->lastRequestHeaders[strtolower($key)] = $value;
             }
