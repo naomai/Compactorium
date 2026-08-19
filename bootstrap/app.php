@@ -10,6 +10,7 @@ Database::init();
 Migration::init();
 Migration::run();
 Http\Client::init();
+Services\Discogs::init();
 Services\MusicBrainz::init();
 Services\CoverArtArchive::init();
 
