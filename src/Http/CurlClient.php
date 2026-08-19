@@ -4,7 +4,7 @@ namespace Naomai\Compactorium\Http;
 use CurlHandle;
 use Naomai\Compactorium\Logger;
 
-class CurlClient {
+class CurlClient implements HttpClient {
     private string $userAgent;
     private string $downloadDir;
     private array $lastRequestInfo;
