@@ -1,7 +1,7 @@
 <?php
 namespace Naomai\Compactorium\Services;
 
-use Naomai\Compactorium\Http\ClientContext;
+use Naomai\Compactorium\Http\CurlClient;
 use Naomai\Compactorium\Http\RateLimiter;
 use Naomai\Compactorium\Logger;
 
@@ -10,11 +10,11 @@ class MusicBrainz {
     // due to rate limiting.
     // might reimplement this with promise-like pattern
 
-    private static ClientContext $client;
+    private static CurlClient $client;
 
 
     public static function init() : void {
-        self::$client = new ClientContext();
+        self::$client = new CurlClient();
         self::$client->rateLimiter = new RateLimiter(
             delay: 1.1,
             httpRemainingHeader: "x-ratelimit-remaining",

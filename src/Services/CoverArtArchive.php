@@ -1,12 +1,12 @@
 <?php
 namespace Naomai\Compactorium\Services;
 
-use Naomai\Compactorium\Http\ClientContext;
+use Naomai\Compactorium\Http\CurlClient;
 use Naomai\Compactorium\Logger;
 
 class CoverArtArchive {
     private static string $storagePath;
-    private static ClientContext $client;
+    private static CurlClient $client;
 
     public static function init() : void {
         self::$storagePath = $_ENV['BASE_DIR'] . "/storage/covers";
@@ -15,7 +15,7 @@ class CoverArtArchive {
             mkdir(directory: self::$storagePath, recursive: true);
         }
 
-        self::$client = new ClientContext();
+        self::$client = new CurlClient();
     }
 
     public static function getReleaseFrontCover(object $mbReleaseData) : ?string {

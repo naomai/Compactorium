@@ -1,16 +1,16 @@
 <?php
 namespace Naomai\Compactorium\Services;
 
-use Naomai\Compactorium\Http\ClientContext;
+use Naomai\Compactorium\Http\CurlClient;
 use Naomai\Compactorium\Http\RateLimiter;
 use Naomai\Compactorium\Logger;
 
 class Discogs {
-    private static ClientContext $client;
+    private static CurlClient $client;
 
 
     public static function init() : void {
-        self::$client = new ClientContext();
+        self::$client = new CurlClient();
         self::$client->rateLimiter = new RateLimiter(
             delay: 1,
             backoffDelay: 10,
