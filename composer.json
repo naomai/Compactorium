@@ -9,10 +9,18 @@
             "Naomai\\Compactorium\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "naomai",
             "email": "lulu@nieznani-sprawcy.pl"
         }
-    ]
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "13"
+    }
 }
