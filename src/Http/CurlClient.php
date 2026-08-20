@@ -39,9 +39,9 @@ class CurlClient implements HttpClient {
         $response = $this->executeCurl($ch);
 
 
-        if ($response === false) {
+        /*if ($response === false) {
             throw new \Exception(curl_error($ch), curl_errno($ch));
-        }
+        }*/
 
         $data = json_decode($response);
 
@@ -88,7 +88,7 @@ class CurlClient implements HttpClient {
 
         curl_setopt_array($ch, [
             CURLOPT_USERAGENT => $this->userAgent,
-            CURLOPT_TIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADERFUNCTION => [$this, 'passHttpHeader'],
         ]);
@@ -103,8 +103,14 @@ class CurlClient implements HttpClient {
                 $this->rateLimiterWait();
                 $this->requestBegin();
                 $response = curl_exec($ch);
-                Logger::debug("Client", "curl request done");
+                if(curl_errno($ch)!==CURLE_OK){
+                    throw new \Exception(curl_error($ch), curl_errno($ch));
+                }
+
                 $this->setLastRequestInfo($ch);
+                $status = $this->lastRequestHeaders['HTTP_STATUS_CODE'] ?? 0;
+                Logger::debug("Client", "curl request done (HTTP {$status})");
+                
 
                 if(!isset($this->lastRequestHeaders['HTTP_STATUS_CODE'])){
                     throw new \Exception("Invalid HTTP header", 0x04376001);
