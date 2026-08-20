@@ -24,8 +24,12 @@ class MusicBrainz {
 
     public static function GetAlbumByBarcode(string $bcd) : ?object {
         // blocking
+        return self::SearchAlbum("barcode:{$bcd}");
+    }
+
+    public static function SearchAlbum(string $query) : ?object {
         $urlArgs = [
-            'query'=>"barcode:{$bcd}",
+            'query'=>$query,
             'fmt'=>'json'
         ];
 
@@ -41,11 +45,19 @@ class MusicBrainz {
         }
 
         if($releases->count == 0) {
-            Logger::debug("MusicBrainz", "no releases");
+            Logger::debug("MusicBrainz", "fail, no releases");
             return null;
         }
 
         $releaseInfo = $releases->releases[0];
+
+        if($releaseInfo->score < 100) {
+            Logger::debug("MusicBrainz", "fail, search result low score ({$releaseInfo->score})");
+
+            return null;
+        }
+
+
         $releaseGroupId = $releaseInfo->{'release-group'}->id;
 
         return (object)[
@@ -53,7 +65,6 @@ class MusicBrainz {
             'releaseId' => $releaseInfo->id,
             'releaseGroupId' => $releaseGroupId
         ];
-
     }
 
     public static function ValidateMbid(string $id) : bool {
