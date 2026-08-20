@@ -12,7 +12,7 @@ class Copy {
     public int $scanId;
     public ?Scan $scan=null;
 
-    public string $releaseMbid;
+    public ?string $releaseMbid;
     public ?Release $release=null;
 
     public ?DateTimeImmutable $createdAt=null;
