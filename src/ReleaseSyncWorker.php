@@ -22,7 +22,7 @@ use Naomai\Compactorium\Services\Discogs;
                 //$alb = MusicBrainz::GetAlbumByBarcode($bcd->barcode);
                 $albDiscogs = Discogs::SearchBarcode($bcd->barcode);
 
-                $mastersCount = count($albDiscogs);
+                $mastersCount = $albDiscogs!==null ? count($albDiscogs) : 0;
                 Logger::debug("ReleaseSyncWorker", "found releases({$mastersCount})");
 
 
@@ -31,8 +31,9 @@ use Naomai\Compactorium\Services\Discogs;
 
                 if($mastersCount == 0) {
                     $alb = MusicBrainz::GetAlbumByBarcode($bcd->barcode);
-
-                    $lastRelease = self::saveRelease($alb, null, $bcd->barcode);
+                    if($alb !== null) {
+                        $lastRelease = self::saveRelease($alb, null, $bcd->barcode);
+                    }
                 } else {
                     foreach($albDiscogs as $master) {
                         $title = $master->title;
