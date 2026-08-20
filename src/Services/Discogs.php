@@ -51,38 +51,41 @@ class Discogs {
             return null;
         }
 
-        $masterIds = [];
+        $masterUrls = [];
 
 
         foreach($search->results as $release) {
+            $releaseUrl = $release->master_url;
             if($release->master_id === 0) {
-                continue;
+                $releaseUrl = $release->resource_url;
             }
-            $masterIds[] = $release->master_id;
+            $masterUrls[] = $releaseUrl;
         }
 
-        $masterIds = array_unique($masterIds);
+        $masterUrls = array_unique($masterUrls);
 
         $masters = array_map(
-            fn($masterId) => self::GetMasterInfo($masterId), 
-            $masterIds
+            fn($releaseUrl) => self::GetReleaseFromUrl($releaseUrl), 
+            $masterUrls
         );
 
         return $masters;
 
     }
 
-    public static function GetMasterInfo(int $masterId) : object {
-        $url = "https://api.discogs.com/masters/{$masterId}";
-        Logger::debug("Discogs", "SearchBarcode url: {$url}");
+    public static function GetReleaseFromUrl(string $url) : object {
+        Logger::debug("Discogs", "GetReleaseFromUrl: {$url}");
         $master = self::$client->getJson($url);
 
-        if(!property_exists($master, 'title')) {
-            throw new \Exception("Discogs error: {$master->message}");
+        return self::ValidateRelease($master);
+    }
+
+    private static function ValidateRelease(object $release) : object {
+        if(!property_exists($release, 'title')) {
+            throw new \Exception("Discogs error: {$release->message}");
         }
 
-        return $master;
-
+        return $release;        
     }
 
     public static function SetHttpClient(HttpClient $client) : void {
