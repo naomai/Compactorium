@@ -23,7 +23,7 @@ class RateLimiter {
         if($currentTime > $this->nextRequestTime) 
             return;
 
-        $delay = $this->nextRequestTime - $currentTime;
+        $delay = round($this->nextRequestTime - $currentTime, 1);
         Logger::debug("RateLimiter", "wait for: {$delay}s");
         time_sleep_until($this->nextRequestTime);
     }
