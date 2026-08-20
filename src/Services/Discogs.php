@@ -55,7 +55,10 @@ class Discogs {
 
 
         foreach($search->results as $release) {
-            array_push($masterIds, $release->master_id);
+            if($release->master_id === 0) {
+                continue;
+            }
+            $masterIds[] = $release->master_id;
         }
 
         $masterIds = array_unique($masterIds);
