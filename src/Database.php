@@ -1,8 +1,17 @@
 <?php
 namespace Naomai\Compactorium;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Tools\DsnParser;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\ORMSetup;
+
 class Database {
     private static ?\PDO $db = null;
+    private static ?Connection $dbConn = null;
+    private static ?EntityManagerInterface $entityManager = null;
 
     public static function init() : void {
         
@@ -12,7 +21,37 @@ class Database {
             throw new \Exception("Database connection is not configured");
         }
 
+        $dsnParser = new DsnParser([
+            'sqlite' => 'pdo_sqlite',
+            'mysql'  => 'pdo_mysql',
+            'pgsql'  => 'pdo_pgsql',
+            'oci'    => 'pdo_oci',
+            'sqlsrv' => 'pdo_sqlsrv',
+        ]);
+
+        $connectionParams = $dsnParser
+            ->parse($dsn);
+        self::$dbConn = DriverManager::getConnection($connectionParams);
+
+        $config = ORMSetup::createAttributeMetadataConfig(
+            paths: [__DIR__],
+            isDevMode: true,
+        );
+
+        $config->setProxyDir(__DIR__ . "/../storage/doctrine/proxies");
+        $config->setProxyNamespace('Naomai\\Compactorium\\Doctrine\\Proxies');
+
+        self::$entityManager = new EntityManager(self::$dbConn, $config);
+
         self::$db = new \PDO( dsn: $dsn);
+    }
+
+    public static function entityManager(): EntityManagerInterface {
+        if (self::$entityManager === null) {
+            throw new \Exception("Database is not initialized");
+        }
+
+        return self::$entityManager;
     }
 
     public static function connection(): \PDO {
