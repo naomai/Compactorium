@@ -1,14 +1,26 @@
 <?php
     namespace Naomai\Compactorium;
 
+    use Naomai\Compactorium\Models\Library;
+    use Naomai\Compactorium\Models\Scan;
+    use Naomai\Compactorium\Views\ScanView;
+
     require __DIR__ . '/../bootstrap/app.php';
 
-    $db = Database::connection();
+    $em = Database::entityManager();
 
     $libraryId = 0;
-    $stm = $db->prepare("SELECT * FROM `scans` WHERE `library_id`=:library_id");
-    $stm->execute(['library_id'=>$libraryId]);
-    $barcodes = $stm->fetchAll(\PDO::FETCH_ASSOC);
+    $library = $em->find(Library::class, $libraryId);
+
+    $scans = $em->getRepository(Scan::class)->findBy(
+        ['library'=>$library],
+        ['id'=>'DESC']
+    );
+
+    $barcodes = array_map(
+        fn($scan)=>ScanView::fromScan($scan), 
+        $scans
+    );
 
 ?>
 <!DOCTYPE html>
