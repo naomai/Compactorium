@@ -1,10 +1,16 @@
+	html {
+		background: #000d0c;
+	}
+	
 	body, table{
-		--tool-accent: #000;
-		--tool-stroke-color: oklch(from var(--tool-accent) 0.3 c h);
-		--tool-control-bg: oklch(from var(--tool-accent) 1 min(l, 0.07) h);
 		font-family: tahoma;
 		font-size: 8pt;
-		color: oklch(from var(--tool-accent) 0.3 c h);
+		color: #3C5;
+
+		background: #000d0c;
+
+		max-width: 960px;
+		margin: 1em auto;
 	}
 	
 	table{
@@ -40,4 +46,13 @@
 		background-color: var(--tool-control-bg);
 		border-color: var(--tool-stroke-color);
 
+	}
+
+	header {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+
+	#headerdeco {
+		text-align: right;
 	}

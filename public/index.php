@@ -150,8 +150,17 @@
     </script>
 </head>
 <body>
-    <button id='scannerOpenBtn'>Open scanner</button>
-    <div id="list"></div>
+    <header>
+        <div id="logotype"><img src="assets/img/logotype.png" alt="Compactorium"/></div>
+        <div id="headerdeco"><img src="assets/img/barcodemonk.png" alt="Barcode monk"/></div>
+
+
+    </header>
+    <main>
+        <button id='scannerOpenBtn'>Open scanner</button>
+        <div id="list"></div>
+
+    </main>
 
     <dialog id="scannerUi" class="popup">
         
@@ -166,6 +175,5 @@
         </button>
 
     </dialog>
-
 </body>
 </html>
