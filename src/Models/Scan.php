@@ -2,66 +2,59 @@
 namespace Naomai\Compactorium\Models;
 
 use DateTimeImmutable;
-use Naomai\Compactorium\Database;
+use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Entity]
+#[ORM\Table(
+    name: 'scans',
+    uniqueConstraints: [
+        new ORM\UniqueConstraint(
+            name: 'idx_scans_unique',
+            columns: ['barcode', 'library_id']
+        )
+    ]
+)]
 class Scan {
-    public ?int $id = null;
-    public int $ownerId;
-    public int $libraryId;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    public int $id;
+
+    // Temporary until User entity exists.
+    #[ORM\Column(name: 'owner_id', type: 'integer')]
+    public int $ownerId = 0;
+
+    #[ORM\ManyToOne(
+        targetEntity: Library::class,
+        inversedBy: 'scans'
+        
+    )]
+    #[ORM\JoinColumn(
+        name: 'library_id',
+        referencedColumnName: 'id',
+        nullable: false
+    )]
+    public Library $library;
+
+    #[ORM\Column(type: 'string')]
     public string $barcode;
+
+    #[ORM\Column(
+        name: 'scanned_at',
+        type: 'datetime_immutable'
+    )]
+    public DateTimeImmutable $scannedAt;
+
+    #[ORM\Column(
+        name: 'processed',
+        type: 'boolean',
+        options: ['default' => false]
+    )]
     public bool $processed = false;
-    public ?DateTimeImmutable $scannedAt=null;
 
-    public function __construct(?array $dbRow=null) {
-        if($dbRow !== null) {
-            $this->unserializeSql($dbRow);
-        }
-    }
-
-    public function sync() {
-        Database::upsert(
-            'scans',
-            $this->serializeSql()
-        );
-
-    }
-
-    public static function getById(int $id) : ?Scan {
-        $db = Database::connection();
-        $stm = $db->prepare("SELECT * FROM `scans` WHERE `id`=:id");
-        $stm->execute(['id' => $id]);
-
-        $row = $stm->fetch(\PDO::FETCH_ASSOC);
-        if($row===false) {
-            return null;
-        }
-
-        return new Scan($row);
-    }
-
-    private function unserializeSql(array $dbRow) : void {
-        $this->id = $dbRow['id'];
-        $this->ownerId = $dbRow['owner_id'];
-        $this->libraryId = $dbRow['library_id'];
-        $this->barcode = $dbRow['barcode'];
-        $this->processed = $dbRow['processed'];
-        $this->scannedAt = Database::createDateTimeFromDbTime($dbRow['scanned_at']);       
-    }
-
-    private function serializeSql() : array {
-        if($this->scannedAt===null) {
-            $this->scannedAt = new DateTimeImmutable();
-        }
-        return [
-            'id' => $this->id,
-            'owner_id' => $this->ownerId,
-            'library_id' => $this->libraryId,
-            'barcode' => $this->barcode,
-            'processed' => $this->processed,
-            'scanned_at' => Database::createDbTimeFromDateTime($this->scannedAt),
-        ];
-    }
-
-
-
+    #[ORM\OneToOne(
+        targetEntity: Copy::class,
+        mappedBy: 'scan',
+    )]
+    public ?Copy $copy;
 }

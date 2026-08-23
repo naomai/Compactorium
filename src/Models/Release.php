@@ -2,63 +2,40 @@
 namespace Naomai\Compactorium\Models;
 
 use DateTimeImmutable;
-use Naomai\Compactorium\Database;
+use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Entity]
+#[ORM\Table(name: 'releases')]
 class Release {
-    public string $mbid;
-    public string $groupMbid;
+    #[ORM\Id]
+    #[ORM\Column(
+        name: 'release_mbid',
+        type: 'string',
+        length: 36
+    )]
+    public string $releaseMbid;
+
+    #[ORM\ManyToOne(targetEntity: Album::class)]
+    #[ORM\JoinColumn(
+        name: 'release_group_mbid',
+        referencedColumnName: 'release_group_mbid',
+        nullable: false
+    )]
+    public Album $album;
+
+    #[ORM\Column(type: 'string')]
     public string $barcode;
-    public object $musicbrainzData;
-    public ?DateTimeImmutable $createdAt=null;
 
-    public function __construct(?array $dbRow=null) {
-        if($dbRow!==null) {
-            $this->unserializeSql($dbRow);
-        }
-    }
+    #[ORM\Column(
+        name: 'musicbrainz_json',
+        type: 'json',
+        nullable: true
+    )]
+    public ?array $musicbrainzJson = null;
 
-    public function sync() {
-        Database::upsert(
-            'releases',
-            $this->serializeSql()
-        );
-
-    }
-
-    public static function findByMbid(string $mbid) : ?Release {
-        $db = Database::connection();
-        $stm = $db->prepare("SELECT * FROM `releases` WHERE `release_mbid`=:mbid");
-        $stm->execute(['mbid' => $mbid]);
-
-        $row = $stm->fetch(\PDO::FETCH_ASSOC);
-        if($row===false) {
-            return null;
-        }
-
-        return new Release($row);
-    }
-
-    private function unserializeSql(array $dbRow) : void {
-        $this->mbid = $dbRow['release_mbid'];
-        $this->groupMbid = $dbRow['release_group_mbid'];
-        $this->barcode = $dbRow['barcode'];
-        $this->musicbrainzData = json_decode($dbRow['musicbrainz_json']);
-        $this->createdAt = Database::createDateTimeFromDbTime($dbRow['created_at']);       
-    }
-
-    private function serializeSql() : array {
-        if($this->createdAt===null) {
-            $this->createdAt = new DateTimeImmutable();
-        }
-        return [
-            'release_mbid' => $this->mbid,
-            'release_group_mbid' => $this->groupMbid,
-            'barcode' => $this->barcode,
-            'musicbrainz_json' => json_encode($this->musicbrainzData),
-            'created_at' => Database::createDbTimeFromDateTime($this->createdAt),
-        ];
-    }
-
-
-
+    #[ORM\Column(
+        name: 'created_at',
+        type: 'datetime_immutable'
+    )]
+    public DateTimeImmutable $createdAt;
 }

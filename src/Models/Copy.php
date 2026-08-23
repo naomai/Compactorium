@@ -2,79 +2,52 @@
 namespace Naomai\Compactorium\Models;
 
 use DateTimeImmutable;
-use Naomai\Compactorium\Database;
+use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Entity]
+#[ORM\Table(name: 'copies')]
 class Copy {
-    public ?int $id=null;
-    public int $libraryId;
-    public int $ownerId;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    public int $id;
 
-    public int $scanId;
-    public ?Scan $scan=null;
+    #[ORM\ManyToOne(
+        targetEntity: Library::class,
+        inversedBy: 'copies',
+    )]
+    #[ORM\JoinColumn(
+        name: 'library_id', 
+        referencedColumnName: 'id', 
+        nullable: false,
+    )]
+    public Library $library;
 
-    public ?string $releaseMbid;
-    public ?Release $release=null;
+    #[ORM\Column(name: 'owner_id', type: 'integer')]
+    public int $ownerId = 0;
 
-    public ?DateTimeImmutable $createdAt=null;
+    #[ORM\OneToOne(
+        targetEntity: Scan::class,
+        inversedBy: 'copy',
+    )]
+    #[ORM\JoinColumn(
+        name: 'scan_id', 
+        referencedColumnName: 'id', 
+        nullable: false,
+    )]
+    public Scan $scan;
 
-    public function __construct(?array $dbRow=null) {
-        if($dbRow!==null) {
-            $this->unserializeSql($dbRow);
-        }
-    }
+    #[ORM\ManyToOne(targetEntity: Release::class)]
+    #[ORM\JoinColumn(
+        name: 'release_mbid',
+        referencedColumnName: 'release_mbid',
+        nullable: true
+    )]
+    public ?Release $release = null;
 
-    public function sync() {
-        Database::upsert(
-            'copies',
-            $this->serializeSql()
-        );
-
-    }
-
-    public function getScan() : Scan {
-        return $this->scan ??= Scan::getById($this->scanId);
-    }
-
-    public function getRelease() : Release {
-        return $this->scan ??= Release::findByMbid($this->releaseMbid);
-    }
-
-    public static function getById(int $id) : ?Copy {
-        $db = Database::connection();
-        $stm = $db->prepare("SELECT * FROM `copies` WHERE `id`=:id");
-        $stm->execute(['id' => $id]);
-
-        $row = $stm->fetch(\PDO::FETCH_ASSOC);
-        if($row===false) {
-            return null;
-        }
-
-        return new Copy($row);
-    }
-
-    private function unserializeSql(array $dbRow) : void {
-        $this->id = $dbRow['id'];
-        $this->libraryId = $dbRow['library_id'];
-        $this->ownerId = $dbRow['owner_id'];
-        $this->scanId = $dbRow['scan_id'];
-        $this->releaseMbid = $dbRow['release_mbid'];
-        $this->createdAt = Database::createDateTimeFromDbTime($dbRow['created_at']);       
-    }
-
-    private function serializeSql() : array {
-        if($this->createdAt===null) {
-            $this->createdAt = new DateTimeImmutable();
-        }
-        return [
-            'id' => $this->id,
-            'library_id' => $this->libraryId,
-            'owner_id' => $this->ownerId,
-            'scan_id' => $this->scanId,
-            'release_mbid' => $this->releaseMbid,
-            'created_at' => Database::createDbTimeFromDateTime($this->createdAt),
-        ];
-    }
-
-
-
+    #[ORM\Column(
+        name: 'created_at',
+        type: 'datetime_immutable'
+    )]
+    public DateTimeImmutable $createdAt;
 }
