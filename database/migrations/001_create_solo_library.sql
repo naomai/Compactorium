@@ -1,4 +1,4 @@
 INSERT INTO `libraries` 
-    (owner_id, name, description)
+    (id, owner_id, name, description)
     VALUES
-    (0, "Default library", "")
+    (0, 0, "Default library", "")
