@@ -34,6 +34,8 @@
     ]);
 
     const codeReader = new ZXing.BrowserMultiFormatReader(hints);
+
+    var scannerControls;
             
         async function initScanner() {
             $("#dbg").text(`ready`);
@@ -47,7 +49,7 @@
             previewCont.appendChild(previewElem);
 
             // you can use the controls to stop() the scan or switchTorch() if available
-            const controls = await codeReader.decodeFromConstraints({
+            scannerControls = await codeReader.decodeFromConstraints({
                 video: {
                     facingMode: "environment",
                     width: { ideal: 1920 },
@@ -66,11 +68,17 @@
             });
         }
 
-        $(document).ready(()=>{
-            initScanner();
-			reloadView();
-        });
+        function stopScanner() {
+            $('#scanner').html("");
+            
+            /*if(scannerControls) {
+                scannerControls.stop();
+            }*/
 
+            codeReader.reset();
+            codeReader.stopContinuousDecode();
+
+        }
 
         function bcdGetError(resullt) {
             // https://github.com/serratus/quaggaJS/issues/237#issue-270285902
@@ -108,15 +116,44 @@
         }
 
         function reloadView() {
-            const html = barcodes.reduce((acc,bcd)=>acc+`<p class='bcdScan'>${bcd.id} - ${bcd.barcode} ${bcd.scanned_at}</p>\n`, "");
+            //const html = barcodes.reduce((acc,bcd)=>acc+`<p class='bcdScan'>${bcd.id} - ${bcd.barcode} ${bcd.scanned_at}</p>\n`, "");
+            const html = barcodes.reduce((acc,bcd)=>acc+`<p class='bcdScan'>${bcd.copy?.artist} - ${bcd.copy?.albumTitle}</p>\n`, "");
             $("#list").html(html);
         }
+
+        $(document).ready(()=>{
+            //initScanner();
+			reloadView();
+
+            $(document).on("click", "#scannerOpenBtn", e=>{
+                $("#scannerUi")[0].showModal();
+                initScanner();
+            });
+
+            $(document).on("click", "#scannerCloseBtn", e=>{
+                stopScanner();
+                $("#scannerUi")[0].close();
+            });
+        });
     </script>
 </head>
 <body>
-    <div id="dbg"></div>
-    <div id="scanner"></div>
+    <button id='scannerOpenBtn'>Open scanner</button>
     <div id="list"></div>
+
+    <dialog id="scannerUi" class="popup">
+        
+        <h2>Scan barcode...</h2>
+        <div id="dbg"></div>
+
+        <div id="scanner"></div>
+
+
+        <button class="close-btn" id="scannerCloseBtn">
+            Close
+        </button>
+
+    </dialog>
 
 </body>
 </html>
