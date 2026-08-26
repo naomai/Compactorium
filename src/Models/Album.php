@@ -9,9 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
 class Album {
     #[ORM\Id]
     #[ORM\Column(
-        name: 'release_group_mbid',
-        type: 'string',
-        length: 36
+        name: 'slug',
+        type: 'string'
     )]
     public string $releaseGroupMbid;
 
@@ -25,7 +24,7 @@ class Album {
     public string $year;
 
     #[ORM\Column(
-        name: 'musicbrainz_json',
+        name: 'raw_json',
         type: 'json',
         nullable: true
     )]

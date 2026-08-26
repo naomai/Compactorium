@@ -37,13 +37,13 @@ class Copy {
     )]
     public Scan $scan;
 
-    #[ORM\ManyToOne(targetEntity: Release::class)]
+    #[ORM\ManyToOne(targetEntity: Album::class)]
     #[ORM\JoinColumn(
-        name: 'release_mbid',
-        referencedColumnName: 'release_mbid',
+        name: 'album_slug',
+        referencedColumnName: 'slug',
         nullable: true
     )]
-    public ?Release $release = null;
+    public ?Album $album = null;
 
     #[ORM\Column(
         name: 'created_at',
