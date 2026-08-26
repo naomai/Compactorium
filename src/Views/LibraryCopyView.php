@@ -17,7 +17,7 @@ class LibraryCopyView {
 
         $view = new self();
 
-        $album = $copy->release?->album;
+        $album = $copy->album;
         
         $view->id = $copy->id;
         $view->barcode = $copy->scan->barcode;
