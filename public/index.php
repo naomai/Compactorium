@@ -151,8 +151,16 @@
 </head>
 <body>
     <header>
-        <div id="logotype"><img src="assets/img/logotype.png" alt="Compactorium"/></div>
-        <div id="headerdeco"><img src="assets/img/barcodemonk.png" alt="Barcode monk"/></div>
+        <div id="logotype"><img 
+            src="assets/img/logotype.png" 
+            srcset="assets/img/logotype.png 640w, assets/img/logotype_s.png 450w"
+            sizes="(width <= 800px) 450px, 640px"
+            alt="Compactorium"/></div>
+        <div id="headerdeco"><img 
+            src="assets/img/barcodemonk.png" 
+            srcset="assets/img/barcodemonk.png 273w, assets/img/barcodemonk_s.png 190w"
+            sizes="(width <= 800px) 190px, 273px"
+            alt="Barcode monk"/></div>
 
 
     </header>
