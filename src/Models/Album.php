@@ -3,6 +3,10 @@ namespace Naomai\Compactorium\Models;
 
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Naomai\Compactorium\Database;
+use Naomai\Compactorium\Slugger;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'albums')]
@@ -12,7 +16,7 @@ class Album {
         name: 'slug',
         type: 'string'
     )]
-    public string $releaseGroupMbid;
+    public string $slug;
 
     #[ORM\Column(type: 'string')]
     public string $title;
@@ -28,7 +32,7 @@ class Album {
         type: 'json',
         nullable: true
     )]
-    public ?array $musicbrainzJson = null;
+    public ?array $rawJson = null;
 
     #[ORM\Column(
         name: 'created_at',
@@ -36,9 +40,34 @@ class Album {
     )]
     public DateTimeImmutable $createdAt;
 
+    #[ORM\Column(type: 'string')]
+    public ?string $image;
+
+    #[ORM\OneToMany(
+        mappedBy: 'album',
+        targetEntity: Barcode::class
+    )]
+    public Collection $barcodes;
+
+    public function __construct() {
+        $this->barcodes = new ArrayCollection();
+    }
+
     public static function getYearFromMbDate(string $mbDate) : ?int {
         preg_match('/^(\d{4})/', $mbDate, $m);
         return (int)$m[1] ?? null;
     }
+
+    public static function fromArtistAndTitle(string $artist, string $title): ?self {
+        $slug = Slugger::slugFromArtistAndAlbum($artist, $title);
+
+        $album = Database::entityManager()
+            ->getRepository(self::class)
+            ->find($slug);
+
+        return $album;
+    }
+
+
 
 }

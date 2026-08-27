@@ -61,9 +61,16 @@ class MusicBrainz {
         $releaseGroupId = $releaseInfo->{'release-group'}->id;
 
         return (object)[
-            'releaseInfo' => $releaseInfo,
-            'releaseId' => $releaseInfo->id,
-            'releaseGroupId' => $releaseGroupId
+            'artist'=>$releaseInfo->{'artist-credit'}[0]->name,
+            'title'=>$releaseInfo->title,
+            'year'=>null,
+            'rawJson'=>[
+                'mb'=>[
+                    'releaseInfo' => $releaseInfo,
+                    'releaseId' => $releaseInfo->id,
+                    'releaseGroupId' => $releaseGroupId
+                ]
+            ]
         ];
     }
 

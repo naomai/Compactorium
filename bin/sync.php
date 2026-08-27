@@ -5,4 +5,5 @@
 
     $db = Database::connection();
 
+    ReleaseSyncWorker::init();
     ReleaseSyncWorker::syncPendingBarcodes();

@@ -69,6 +69,16 @@ class Discogs {
             $masterUrls
         );
 
+        /*$masters = array_values(
+            array_reduce($masters, function (array $acc, array $master) {
+                if (!isset($acc[$master['abc']])) {
+                    $acc[$master['abc']] = $master;
+                }
+
+                return $acc;
+            }, [])
+        );*/
+
         return $masters;
 
     }
