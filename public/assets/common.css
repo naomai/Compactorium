@@ -56,3 +56,18 @@
 	#headerdeco {
 		text-align: right;
 	}
+
+
+	#list {
+		display: flex;
+		flex-wrap: wrap;
+
+		.albumCopy {
+			width: 200px;
+			padding: 10px;
+
+			.cover {
+				width: 100%;
+			}
+		}
+	}

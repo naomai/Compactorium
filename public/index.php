@@ -32,7 +32,6 @@
     <!-- <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.12.1/dist/quagga.js"></script> -->
     <!-- <script type="text/javascript" src="https://unpkg.com/@zxing/browser@latest"></script> -->
     <script src="https://unpkg.com/@zxing/library@latest"></script>
-    <!-- <script src="https://unpkg.com/petite-vue" defer init></script> -->
     <link rel="stylesheet" href="assets/common.css">
     <title>Compactorium</title>
 
@@ -127,10 +126,14 @@
 		   reloadView();
         }
 
+
+
         function reloadView() {
             //const html = barcodes.reduce((acc,bcd)=>acc+`<p class='bcdScan'>${bcd.id} - ${bcd.barcode} ${bcd.scanned_at}</p>\n`, "");
-            const html = barcodes.reduce((acc,bcd)=>acc+`<p class='bcdScan'>${bcd.copy?.artist} - ${bcd.copy?.albumTitle}</p>\n`, "");
-            $("#list").html(html);
+            /*const html = barcodes.reduce((acc,bcd)=>acc+`<p class='bcdScan'>${bcd.copy?.artist} - ${bcd.copy?.albumTitle}</p>\n`, "");
+            $("#list").html(html);*/
+            store.scans = barcodes;
+
         }
 
         $(document).ready(()=>{
@@ -147,6 +150,19 @@
                 $("#scannerUi")[0].close();
             });
         });
+
+        var store;
+
+        
+    </script>
+    <script type="module">
+        import { reactive, createApp } from 'https://esm.sh/pocket-vue'
+
+        store = reactive({
+            scans: []
+        });
+
+        createApp({store}).mount();
     </script>
 </head>
 <body>
@@ -166,7 +182,17 @@
     </header>
     <main>
         <button id='scannerOpenBtn'>Open scanner</button>
-        <div id="list"></div>
+        <div id="list" v-scope>
+            <div v-for="scan in store.scans" class="albumCopy">
+                <template v-if="scan.copy !== null">
+                    <img v-if="scan.copy.image !== null" :src="`cover.php?src=${scan.copy.image}`" alt="front cover" class="cover" />
+                    {{ scan.copy.artist }} - {{ scan.copy.albumTitle }}
+                </template>
+                <template v-else>
+                    {{ scan.barcode }}
+                </template>
+            </div>
+        </div>
 
     </main>
 
