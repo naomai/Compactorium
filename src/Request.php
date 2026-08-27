@@ -2,10 +2,10 @@
     namespace Naomai\Compactorium;
     class Request {
         protected array $request;
-        public static string $method;
+        public static ?string $method;
 
         public static function init() : void {
-            self::$method = $_SERVER['REQUEST_METHOD'];
+            self::$method = $_SERVER['REQUEST_METHOD'] ?? null;
         }
 
         public function __construct(array $requestContent) {
