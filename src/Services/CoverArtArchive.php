@@ -3,6 +3,7 @@ namespace Naomai\Compactorium\Services;
 
 use Naomai\Compactorium\Http\CurlClient;
 use Naomai\Compactorium\Logger;
+use Naomai\Compactorium\Slugger;
 
 class CoverArtArchive {
     private static string $storagePath;
@@ -17,16 +18,24 @@ class CoverArtArchive {
 
         self::$client = new CurlClient();
     }
+    
+    public static function getFrontCover(string $artist, string $title) : ?string {
+        $album = MusicBrainz::SearchAlbum("artistname:\"{$artist}\" release:\"{$title}\"");
+        return self::getReleaseFrontCover($album->rawJson);
+    }
 
     public static function getReleaseFrontCover(object $mbReleaseData) : ?string {
-        
-        
         $releaseId = $mbReleaseData->releaseId;
         $releaseGroupId = $mbReleaseData->releaseGroupId;
 
-        Logger::debug("CoverArtArchive", "get front cover : {$releaseId}");
+        $artist = $mbReleaseData->releaseInfo->{'artist-credit'}[0]->name;
+        $title = $mbReleaseData->releaseInfo->title;
 
-        $outputFile = self::getLocalReleaseFrontCover($releaseId);
+        $slug = Slugger::slugFromArtistAndAlbum($artist, $title);
+
+        Logger::debug("CoverArtArchive", "get front cover : {$slug}");
+
+        $outputFile = self::getLocalReleaseFrontCover($slug);
         if($outputFile !== null) {
             return $outputFile;
         }
@@ -52,28 +61,28 @@ class CoverArtArchive {
             default      => 'bin'
         };
 
-        $outputFile = self::$storagePath . "/" . $releaseId . "-front." . $extension;
+        $outputFile = self::$storagePath . "/" . $slug . "-front." . $extension;
 
-        Logger::debug("CoverArtArchive", "store downloaded cover  {$releaseId}");
+        Logger::debug("CoverArtArchive", "store downloaded cover  {$slug}");
 
 
         rename($frontFile, $outputFile);
 
-        return $outputFile;
+        return realpath($outputFile);
     }
 
-    private static function getLocalReleaseFrontCover(string $releaseId) {
+    private static function getLocalReleaseFrontCover(string $slug) {
 
-        $globSearch = glob(self::$storagePath . "/" . $releaseId . "-front.*");
+        $globSearch = glob(self::$storagePath . "/" . $slug . "-front.*");
 
         if(count($globSearch)==0) {
             return null;
         }
 
-        Logger::debug("CoverArtArchive", "got local cover: {$releaseId}");
+        Logger::debug("CoverArtArchive", "got local cover: {$slug}");
 
 
-        return $globSearch[0];
+        return realpath($globSearch[0]);
 
     }
 }
