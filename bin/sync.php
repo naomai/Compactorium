@@ -3,7 +3,5 @@
 
     require __DIR__ . '/../bootstrap/app.php';
 
-    $db = Database::connection();
-
     ReleaseSyncWorker::init();
     ReleaseSyncWorker::syncPendingBarcodes();
