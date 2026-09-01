@@ -10,6 +10,7 @@ class LibraryCopyView {
     public ?string $artist;
     public ?string $year;
     public ?string $image;
+    public ?AlbumDisambigView $disambiguation;
 
     public static function fromCopy(?Copy $copy) : ?self {
         if($copy===null) {
@@ -26,6 +27,10 @@ class LibraryCopyView {
         $view->artist = $album?->artist;
         $view->year = $album?->year;
         $view->image = $album?->image;
+
+        if($album === null) {
+            $view->disambiguation = AlbumDisambigView::fromBarcodesCollection($copy->scan->barcodes);
+        }
 
         return $view;
     }

@@ -149,7 +149,31 @@
                 stopScanner();
                 $("#scannerUi")[0].close();
             });
+
+            
+            $(document).on("dblclick", ".popup", function (e) {
+
+
+                const rect = this.getBoundingClientRect();
+
+                const inside =
+                    rect.top <= e.clientY &&
+                    e.clientY <= rect.top + rect.height &&
+                    rect.left <= e.clientX &&
+                    e.clientX <= rect.left + rect.width;
+
+                if (!inside) {
+                    this.close();
+                }
+
+            });
         });
+
+        function showDisambigSelector(scan) {
+            store.disambigScan = scan;
+            $("#disambigUi")[0].showModal();
+
+        }
 
         var store;
 
@@ -157,9 +181,11 @@
     </script>
     <script type="module">
         import { reactive, createApp } from 'https://esm.sh/pocket-vue'
+        //import { reactive, createApp } from 'https://unpkg.com/petite-vue?module'
 
         store = reactive({
-            scans: []
+            scans: [],
+            disambigScan: null,
         });
 
         createApp({store}).mount();
@@ -182,15 +208,26 @@
     </header>
     <main>
         <button id='scannerOpenBtn'>Open scanner</button>
-        <div id="list" v-scope>
-            <div v-for="scan in store.scans" class="albumCopy">
-                <template v-if="scan.copy !== null">
-                    <img v-if="scan.copy.image !== null" :src="`cover.php?src=${scan.copy.image}`" alt="front cover" class="cover" />
-                    {{ scan.copy.artist }} - {{ scan.copy.albumTitle }}
-                </template>
-                <template v-else>
-                    {{ scan.barcode }}
-                </template>
+        <div class="panel">
+            <h2>Collection</h2>
+            <div id="list" v-scope>
+                <div v-for="scan in store.scans" class="albumCopy">
+                    <template v-if="scan.copy !== null">
+                        <template v-if="scan.copy.disambiguation === undefined">
+                            <img v-if="scan.copy.image !== null" :src="`cover.php?src=${scan.copy.image}`" alt="front cover" class="cover" />
+                            {{ scan.copy.artist }} - {{ scan.copy.albumTitle }}
+                        </template>
+                        <template v-else>
+                            <button @click="showDisambigSelector(scan)">Multiple albums</button>
+                             <!-- <div v-for="album in scan.copy.disambiguation.albums">
+                                {{album.artist}} - {{album.title}}
+                            </div> -->
+                        </template>
+                    </template>
+                    <template v-else>
+                        {{ scan.barcode }}
+                    </template>
+                </div>
             </div>
         </div>
 
@@ -209,5 +246,16 @@
         </button>
 
     </dialog>
+
+    <dialog id="disambigUi" class="popup" v-scope>
+        <h2>Select the correct album...</h2>
+
+        <div v-for="album in store.disambigScan.copy.disambiguation.albums">
+            <img v-if="album.image !== null" :src="`cover.php?src=${album.image}`" alt="front cover" class="cover" />
+
+            {{album.artist}} - {{album.title}}
+        </div>
+    </dialog>
+
 </body>
 </html>

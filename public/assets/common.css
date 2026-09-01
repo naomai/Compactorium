@@ -51,16 +51,58 @@
 	header {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
+
+		#headerdeco {
+			text-align: right;
+		}
+
 	}
 
-	#headerdeco {
-		text-align: right;
+	@media (width <= 640px) {
+		header {
+			grid-template-columns: 1fr;
+			justify-items: center;
+
+			#headerdeco {
+				display: none;
+			}
+
+			#logotype img {
+				max-width: 100%;
+			}
+		}
+	}
+
+	.panel {
+		border: 1px solid #666;
+
+		h2{
+			outline: 1px solid #666;
+			color: #7a48b8;
+			margin: 0 0 2px 0;
+			text-align: center;
+			text-transform: uppercase;
+
+			&::before {
+				content: ". : "
+			}
+
+			&::after {
+				content: " : ."
+			}
+		}
+	}
+
+	#scanner video {
+		max-width: 720px;
 	}
 
 
 	#list {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
+
 
 		.albumCopy {
 			width: 200px;
@@ -69,5 +111,11 @@
 			.cover {
 				width: 100%;
 			}
+		}
+	}
+
+	#disambigUi {
+		.cover {
+			width: 50px;
 		}
 	}

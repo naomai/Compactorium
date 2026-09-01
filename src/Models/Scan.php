@@ -2,6 +2,8 @@
 namespace Naomai\Compactorium\Models;
 
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -57,4 +59,20 @@ class Scan {
         mappedBy: 'scan',
     )]
     public ?Copy $copy;
+
+    #[ORM\ManyToMany(targetEntity: Barcode::class)]
+    #[ORM\JoinTable(name: 'barcodes')]
+    #[ORM\JoinColumn(
+        name: 'barcode',
+        referencedColumnName: 'barcode'
+    )]
+    #[ORM\InverseJoinColumn(
+        name: 'barcode',
+        referencedColumnName: 'barcode'
+    )]
+    public Collection $barcodes;
+
+    public function __construct() {
+        $this->barcodes = new ArrayCollection();
+    }
 }
