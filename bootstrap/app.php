@@ -14,3 +14,6 @@ Services\Discogs::init();
 Services\MusicBrainz::init();
 Services\CoverArtArchive::init();
 
+error_reporting(E_ALL ^ E_DEPRECATED);
+
+$auth = new \Delight\Auth\Auth(Database::connection());
