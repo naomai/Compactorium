@@ -1,5 +1,6 @@
 # Compactorium
 ![Compactorium logo](public/assets/img/logotype.png)
+
 A self-hosted mausoleum for your music CDs collection. Every barcode... opens a grave holding another relic of format that should have been extinct long ago.
 
 ## Is this for me?
