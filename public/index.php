@@ -109,7 +109,7 @@
             sendBcd(bcd);
         }
 
-       async function sendBcd(bcd) {
+        async function sendBcd(bcd) {
             const resp=await fetch("api/scan.php", {
                 method: "POST",
                 headers: {
@@ -175,6 +175,14 @@
 
         }
 
+        function formatArtistName(name) {
+            const groups = name.match(/^(.+?)(?:\s+\(\d+\))?$/);
+            if(groups === null) {
+                return null;
+            }
+            return groups[1];
+        }
+
         var store;
 
         
@@ -211,11 +219,14 @@
         <div class="panel">
             <h2>Collection</h2>
             <div id="list" v-scope>
-                <div v-for="scan in store.scans" class="albumCopy">
+                <div v-for="scan in store.scans" class="album albumCopy">
                     <template v-if="scan.copy !== null">
                         <template v-if="scan.copy.disambiguation === undefined">
                             <img v-if="scan.copy.image !== null" :src="`cover.php?src=${scan.copy.image}`" alt="front cover" class="cover" />
-                            {{ scan.copy.artist }} - {{ scan.copy.albumTitle }}
+                            <div class='albumDetails'>
+                                <div class='albumTitle'>{{scan.copy.albumTitle}}</div>
+                                <div class='albumArtist'>{{formatArtistName(scan.copy.artist)}} [{{scan.copy.year}}]</div>
+                            </div>
                         </template>
                         <template v-else>
                             <button @click="showDisambigSelector(scan)">Multiple albums</button>
@@ -250,10 +261,12 @@
     <dialog id="disambigUi" class="popup" v-scope>
         <h2>Select the correct album...</h2>
 
-        <div v-for="album in store.disambigScan.copy.disambiguation.albums">
+        <div v-for="album in store.disambigScan.copy.disambiguation.albums" class="album">
             <img v-if="album.image !== null" :src="`cover.php?src=${album.image}`" alt="front cover" class="cover" />
-
-            {{album.artist}} - {{album.title}}
+            <div class='albumDetails'>
+                <div class='albumTitle'>{{album.title}}</div>
+                <div class='albumArtist'>{{formatArtistName(album.artist)}} [{{album.year}}]</div>
+            </div>
         </div>
     </dialog>
 

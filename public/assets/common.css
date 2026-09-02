@@ -93,6 +93,11 @@
 		}
 	}
 
+	.album .albumTitle {
+		font-size: 1.3em;
+		font-weight: bold;
+	}
+
 	#scanner video {
 		max-width: 720px;
 	}
@@ -115,6 +120,11 @@
 	}
 
 	#disambigUi {
+		.album {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			gap: 5px;
+		}
 		.cover {
 			width: 50px;
 		}
