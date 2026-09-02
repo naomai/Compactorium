@@ -11,7 +11,7 @@ class CoverArtArchive {
     
     public static function getFrontCover(string $artist, string $title) : ?string {
         $album = MusicBrainz::SearchAlbum("artistname:\"{$artist}\" release:\"{$title}\"");
-        return self::getReleaseFrontCover($album->rawJson);
+        return self::getReleaseFrontCover($album->rawJson['mb']);
     }
 
     public static function getReleaseFrontCover(object $mbReleaseData) : ?string {

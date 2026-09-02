@@ -65,9 +65,9 @@ class AlbumResolver {
                     'title'=>$title,
                     'year'=>$master->year,
                     'barcode'=>$bcd,
-                    'rawJson'=>[
+                    'rawJson'=>(object)[
                         'discogs'=>$master,
-                        'mb'=>$mbData?->rawJson['mb']
+                        'mb'=>$mbData?->rawJson->mb
                     ]
                 ];
                 $albumData = self::saveAlbum($alb, $bcd);
@@ -78,11 +78,11 @@ class AlbumResolver {
     }
 
     public function getFrontCover(Album $album) : ?string {
-        if(isset($album->rawJson['discogs']->images[0])) {
-            return Discogs::getFrontCover((object)$album->rawJson['discogs']);
+        if(isset($album->rawJson->discogs->images[0])) {
+            return Discogs::getFrontCover((object)$album->rawJson->discogs);
         }
-        if(isset($album->rawJson['mb']['releaseInfo'])) {
-            return CoverArtArchive::getReleaseFrontCover((object)$album->rawJson['mb']);
+        if(isset($album->rawJson->mb->releaseInfo)) {
+            return CoverArtArchive::getReleaseFrontCover((object)$album->rawJson->mb);
         }
         return null;
     }
@@ -91,24 +91,21 @@ class AlbumResolver {
         $em = $this->em;
 
         $slug = Slugger::slugFromArtistAndAlbum($albumData->artist, $albumData->title);
-        $albObjSaved = $em->find(Album::class, $slug);
-        if($albObjSaved !== null) {
-            Logger::debug("AlbumResolver", "not saving (already saved) {$albumData->artist} - {$albumData->title}");
-            return $albObjSaved;
+        $albObj = $em->find(Album::class, $slug);
+        if($albObj !== null) {
+            Logger::debug("AlbumResolver", "found album (already saved) {$albumData->artist} - {$albumData->title}");
+        } else {
+            $albObj = new Album();
+
+            $albObj->artist = $albumData->artist;
+            $albObj->title = $albumData->title;
+            $albObj->slug = $slug;
+
+            //$albObj->year = Album::getYearFromMbDate($release->date);
+            $albObj->year = $albumData->year;
+            $albObj->rawJson = $albumData->rawJson;
+            $albObj->createdAt = new DateTimeImmutable();
         }
-
-        $albObj = new Album();
-
-        $albObj->artist = $albumData->artist;
-        $albObj->title = $albumData->title;
-        $albObj->slug = $slug;
-
-
-
-        //$albObj->year = Album::getYearFromMbDate($release->date);
-        $albObj->year = $albumData->year;
-        $albObj->rawJson = $albumData->rawJson;
-        $albObj->createdAt = new DateTimeImmutable();
 
         $coverPath = $this->getFrontCover($albObj);
         $coverPathRelative = ltrim(

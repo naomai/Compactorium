@@ -64,8 +64,8 @@ class MusicBrainz {
             'artist'=>$releaseInfo->{'artist-credit'}[0]->name,
             'title'=>$releaseInfo->title,
             'year'=>null,
-            'rawJson'=>[
-                'mb'=>[
+            'rawJson'=>(object)[
+                'mb'=>(object)[
                     'releaseInfo' => $releaseInfo,
                     'releaseId' => $releaseInfo->id,
                     'releaseGroupId' => $releaseGroupId

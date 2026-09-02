@@ -29,10 +29,10 @@ class Album {
 
     #[ORM\Column(
         name: 'raw_json',
-        type: 'json',
+        type: 'json_object',
         nullable: true
     )]
-    public ?array $rawJson = null;
+    public ?object $rawJson = null;
 
     #[ORM\Column(
         name: 'created_at',
