@@ -58,20 +58,7 @@
 
 	}
 
-	@media (width <= 640px) {
-		header {
-			grid-template-columns: 1fr;
-			justify-items: center;
 
-			#headerdeco {
-				display: none;
-			}
-
-			#logotype img {
-				max-width: 100%;
-			}
-		}
-	}
 
 	.panel {
 		border: 1px solid #666;
@@ -127,5 +114,29 @@
 		}
 		.cover {
 			width: 50px;
+		}
+	}
+
+	@media (width <= 640px) {
+		header {
+			grid-template-columns: 1fr;
+			justify-items: center;
+
+			#headerdeco {
+				display: none;
+			}
+
+			#logotype img {
+				max-width: 100%;
+			}
+		}
+
+		#list {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+
+			.albumCopy {
+				width: unset;
+			}
 		}
 	}
