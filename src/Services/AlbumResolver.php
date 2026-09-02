@@ -78,9 +78,9 @@ class AlbumResolver {
     }
 
     public function getFrontCover(Album $album) : ?string {
-        /*if(isset($album->rawJson['discogs']['images'][0])) {
-
-        }*/
+        if(isset($album->rawJson['discogs']->images[0])) {
+            return Discogs::getFrontCover((object)$album->rawJson['discogs']);
+        }
         if(isset($album->rawJson['mb']['releaseInfo'])) {
             return CoverArtArchive::getReleaseFrontCover((object)$album->rawJson['mb']);
         }
