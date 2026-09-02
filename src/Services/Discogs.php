@@ -101,4 +101,24 @@ class Discogs {
     public static function SetHttpClient(HttpClient $client) : void {
         self::$client = $client;
     }
+
+    public static function getFrontCover(object $discogsAlbum) : ?string {
+        $title = $discogsAlbum->title;
+        $artist = $discogsAlbum->artists[0]->name;
+
+        $localPath = CoverArtStore::getStoredCover($artist, $title);
+        if($localPath) {
+            return $localPath;
+        }
+
+        if(!isset($discogsAlbum->images[0])) {
+            return null;
+        }
+
+        $imageUrl = $discogsAlbum->images[0]->{'resource_url'};
+
+        return CoverArtStore::downloadCover($artist, $title, $imageUrl, client: self::$client);
+
+        
+    }
 }
