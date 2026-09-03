@@ -170,6 +170,11 @@
                 }
 
             });
+
+            $("#disambigUi").on("close", (e)=>{
+            store.disambigScan = null;
+
+            })
         });
 
         function showDisambigSelector(scan) {
