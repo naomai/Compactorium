@@ -106,6 +106,21 @@
 		}
 	}
 
+	#unresolved {
+		.disambigRow {
+
+		}
+
+		.disambigPreview {
+			width: 32px;
+			display: inline-block;
+			
+			.cover {
+				width: 100%;
+			}
+		}
+	}
+
 	#disambigUi {
 		.album {
 			display: grid;

@@ -132,7 +132,10 @@
             //const html = barcodes.reduce((acc,bcd)=>acc+`<p class='bcdScan'>${bcd.id} - ${bcd.barcode} ${bcd.scanned_at}</p>\n`, "");
             /*const html = barcodes.reduce((acc,bcd)=>acc+`<p class='bcdScan'>${bcd.copy?.artist} - ${bcd.copy?.albumTitle}</p>\n`, "");
             $("#list").html(html);*/
-            store.scans = barcodes;
+            const resolvedCheck=(scan) => scan.copy!==null && scan.copy.disambiguation===undefined;
+
+            store.library = barcodes.filter((scan)=>resolvedCheck(scan));
+            store.unresolved = barcodes.filter((scan)=>!resolvedCheck(scan));
 
         }
 
@@ -216,16 +219,25 @@
         }
 
         function ListViewCopyPlaceholder(copy) {
-            if(copy === null) {
-                return {
-                    $template: '#tplAlbumPlaceholderBarcode'
-                }
-            }
+            return {};
+        }
 
-            return {
-                $template: '#tplAlbumPlaceholderDisambig',
-                copy: copy
-            }
+
+        function UnresolvedScanView(scan) {
+            if(scan.copy === null) {
+                return {
+                    $template: '#tplAlbumPlaceholderBarcode',
+                    scan: scan,
+                }
+            } 
+            else if(scan.copy.disambiguation !== undefined) {
+                return {
+                    $template: '#tplAlbumPlaceholderDisambig',
+                    scan: scan,
+                }
+            } 
+
+            return {};
         }
         
     </script>
@@ -234,7 +246,8 @@
         //import { reactive, createApp } from 'https://unpkg.com/petite-vue?module'
 
         store = reactive({
-            scans: [],
+            library: [],
+            unresolved: [],
             disambigScan: null,
         });
 
@@ -261,7 +274,7 @@
         <div class="panel">
             <h2>Collection</h2>
             <div id="list" v-scope>
-                <div v-for="scan in store.scans"  v-scope="ListViewCopy(scan.copy)" class="album albumCopy">
+                <div v-for="scan in store.library"  v-scope="ListViewCopy(scan.copy)" class="album albumCopy">
                 </div>
                 <!-- <div v-for="scan in store.scans" class="album albumCopy">
                     <template v-if="scan.copy !== null">
@@ -280,6 +293,14 @@
                         {{ scan.barcode }}
                     </template>
                 </div> -->
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Unmarked graves</h2>
+            <div id="unresolved" v-scope>
+                <div v-for="scan in store.unresolved" v-scope="UnresolvedScanView(scan)" class="unresolvedScan">
+                </div>
             </div>
         </div>
 
@@ -302,17 +323,30 @@
     <dialog id="disambigUi" class="popup" v-scope>
         <h2>Select the correct album...</h2>
 
-        <div v-for="album in store.disambigScan.copy.disambiguation.albums" class="album">
+        <div v-for="album in store.disambigScan.copy.disambiguation.albums"  v-scope="ListViewAlbum(album)" class="album albumCopy">
+        </div>
+
+        <!-- <div v-for="album in store.disambigScan.copy.disambiguation.albums" class="album">
             <img v-if="album.image !== null" :src="`cover.php?src=${album.image}`" alt="front cover" class="cover" />
             <div class='albumDetails'>
                 <div class='albumTitle'>{{album.title}}</div>
                 <div class='albumArtist'>{{formatArtistName(album.artist)}} [{{album.year}}]</div>
             </div>
-        </div>
+        </div> -->
     </dialog>
 
-    <template id="tplAlbumPlaceholderBarcode"></template>
-    <template id="tplAlbumPlaceholderDisambig"></template>
+    <template id="tplAlbumPlaceholderBarcode">
+        {{scan.barcode}}
+    </template>
+
+    <template id="tplAlbumPlaceholderDisambig">
+        <div class='disambigRow'>
+            <div v-for="album in scan.copy.disambiguation.albums" class="disambigPreview">
+                <img :src="album.image!==null ? `cover.php?src=${album.image}` : `assets/img/placeholder.png`" :alt="`[${album.artist} - ${album.title}]`" class='cover' />
+            </div>
+            <button @click="showDisambigSelector(scan)">Multiple albums</button>
+        </div>
+    </template>
 
     <template id="tplAlbumCopy">
 
