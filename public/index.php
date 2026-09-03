@@ -185,6 +185,48 @@
 
         var store;
 
+        function mapCopyToAlbum(copy) {
+            if(copy === null || copy.disambiguation !== undefined){
+                return null;
+            }
+
+            return {
+                artist: copy.artist,
+                title: copy.albumTitle,
+                year: copy.year ?? 0,
+                image: copy.image ?? null,
+            };
+        }
+
+        function ListViewCopy(copy) {
+            const album=mapCopyToAlbum(copy);
+            if(album !== null) {
+                return ListViewAlbum(album);
+            }
+
+            return ListViewCopyPlaceholder(copy);
+
+        }
+
+        function ListViewAlbum(album) {
+            return {
+                $template: '#tplAlbumCopy',
+                album: album,
+            }
+        }
+
+        function ListViewCopyPlaceholder(copy) {
+            if(copy === null) {
+                return {
+                    $template: '#tplAlbumPlaceholderBarcode'
+                }
+            }
+
+            return {
+                $template: '#tplAlbumPlaceholderDisambig',
+                copy: copy
+            }
+        }
         
     </script>
     <script type="module">
@@ -219,7 +261,9 @@
         <div class="panel">
             <h2>Collection</h2>
             <div id="list" v-scope>
-                <div v-for="scan in store.scans" class="album albumCopy">
+                <div v-for="scan in store.scans"  v-scope="ListViewCopy(scan.copy)" class="album albumCopy">
+                </div>
+                <!-- <div v-for="scan in store.scans" class="album albumCopy">
                     <template v-if="scan.copy !== null">
                         <template v-if="scan.copy.disambiguation === undefined">
                             <img v-if="scan.copy.image !== null" :src="`cover.php?src=${scan.copy.image}`" alt="front cover" class="cover" />
@@ -230,15 +274,12 @@
                         </template>
                         <template v-else>
                             <button @click="showDisambigSelector(scan)">Multiple albums</button>
-                             <!-- <div v-for="album in scan.copy.disambiguation.albums">
-                                {{album.artist}} - {{album.title}}
-                            </div> -->
                         </template>
                     </template>
                     <template v-else>
                         {{ scan.barcode }}
                     </template>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -269,6 +310,20 @@
             </div>
         </div>
     </dialog>
+
+    <template id="tplAlbumPlaceholderBarcode"></template>
+    <template id="tplAlbumPlaceholderDisambig"></template>
+
+    <template id="tplAlbumCopy">
+
+        <img :src="album.image!==null ? `cover.php?src=${album.image}` : `assets/img/placeholder.png`" alt="front cover" class="cover" />
+        <div class='albumDetails'>
+            <div class='albumTitle'>{{album.title}}</div>
+            <div class='albumArtist'>{{formatArtistName(album.artist)}} [{{album.year}}]</div>
+        </div>
+
+    </template>
+
 
 </body>
 </html>
