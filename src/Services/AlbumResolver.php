@@ -4,7 +4,6 @@ namespace Naomai\Compactorium\Services;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\EntityIdentityCollisionException;
 use Naomai\Compactorium\Logger;
 use Naomai\Compactorium\Models\Album;
 use Naomai\Compactorium\Models\Barcode;
@@ -40,7 +39,6 @@ class AlbumResolver {
 
     public function downloadMetadataForBarcode(string $bcd) : array {
         Logger::debug("AlbumResolver", "search bcd {$bcd}");
-        //$alb = MusicBrainz::GetAlbumByBarcode($bcd->barcode);
         $albDiscogs = Discogs::SearchBarcode($bcd);
 
         $mastersCount = $albDiscogs!==null ? count($albDiscogs) : 0;
@@ -101,7 +99,6 @@ class AlbumResolver {
             $albObj->title = $albumData->title;
             $albObj->slug = $slug;
 
-            //$albObj->year = Album::getYearFromMbDate($release->date);
             $albObj->year = $albumData->year;
             $albObj->rawJson = $albumData->rawJson;
             $albObj->createdAt = new DateTimeImmutable();

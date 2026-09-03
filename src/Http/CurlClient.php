@@ -38,11 +38,6 @@ class CurlClient implements HttpClient {
 
         $response = $this->executeCurl($ch);
 
-
-        /*if ($response === false) {
-            throw new \Exception(curl_error($ch), curl_errno($ch));
-        }*/
-
         $data = json_decode($response);
 
         return $data;
