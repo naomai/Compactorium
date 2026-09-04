@@ -18,12 +18,12 @@
         }
 
         public function int(string $key, ?int $default=null) : ?int {
-            return $this->validateField($key, is_int(...), $default);
+            return $this->validateField($key, fn($x)=>filter_var($x, FILTER_VALIDATE_INT)!==false, $default);
 
         }
 
         public function bool(string $key, ?bool $default=null) : ?bool {
-            return $this->validateField($key, is_bool(...), $default);
+            return $this->validateField($key, fn($x)=>filter_var($x, FILTER_VALIDATE_BOOL)!==false, $default);
 
         }
 
@@ -50,6 +50,10 @@
                 throw new \Exception("Invalid request method");
             }
 
+            return self::content();
+        }
+
+        public static function content() : self {
             $contentType = $_SERVER["CONTENT_TYPE"] ?? $_SERVER["HTTP_CONTENT_TYPE"];
 
             if($contentType=="application/json") {
