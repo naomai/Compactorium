@@ -94,9 +94,10 @@
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
-
+		align-items: stretch;
 
 		.albumCopy {
+			display: inline-block;
 			width: 200px;
 			padding: 10px;
 
