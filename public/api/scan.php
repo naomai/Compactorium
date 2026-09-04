@@ -14,6 +14,8 @@ $httpCode = 404;
 
 try {
     $em = Database::entityManager();
+
+    $userId = 0;
     
     switch(Request::$method) {
         case "POST":
@@ -22,6 +24,10 @@ try {
             $bcd = $request->text("bcd");
             $libraryId = $request->int("library", 0);
             $library = $em->find(Library::class, $libraryId);
+
+            if($library->ownerId !== $userId) {
+                throw new Exception("Unauthorized.");
+            }
 
             if(!preg_match('/^(?:\d{8}|\d{13})$/', $bcd)){
                 throw new Exception("Invalid barcode format.");
@@ -56,6 +62,10 @@ try {
             $request = Request::get();
             $libraryId = $request->int("library", 0);
             $library = $em->find(Library::class, $libraryId);
+
+            if($library->ownerId !== $userId) {
+                throw new Exception("Unauthorized.");
+            }
 
             $scans = $em->getRepository(Scan::class)->findBy(
                 ['library'=>$library],
