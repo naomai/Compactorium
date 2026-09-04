@@ -122,7 +122,7 @@
 
 
         function reloadView() {
-            const resolvedCheck=(scan) => scan.copy!==null && scan.copy.disambiguation===undefined;
+            const resolvedCheck=(scan) => scan.copy!==null && scan.copy.albumTitle!==null;
 
             store.library = barcodes.filter((scan)=>resolvedCheck(scan));
             store.unresolved = barcodes.filter((scan)=>!resolvedCheck(scan));

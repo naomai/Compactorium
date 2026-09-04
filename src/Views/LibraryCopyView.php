@@ -28,8 +28,9 @@ class LibraryCopyView {
         $view->year = $album?->year;
         $view->image = $album?->image;
 
-        if($album === null) {
-            $view->disambiguation = AlbumDisambigView::fromBarcodesCollection($copy->scan->barcodes);
+        $disambig = AlbumDisambigView::fromBarcodesCollection($copy->scan->barcodes);
+        if(count($disambig->albums) > 1) {
+            $view->disambiguation = $disambig;
         }
 
         return $view;
