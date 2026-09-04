@@ -184,7 +184,7 @@
         var store;
 
         function mapCopyToAlbum(copy) {
-            if(copy === null || copy.disambiguation !== undefined){
+            if(copy === null || copy.albumTitle === null){
                 return null;
             }
 
@@ -225,7 +225,7 @@
                     scan: scan,
                 }
             } 
-            else if(scan.copy.disambiguation !== undefined) {
+            else if(scan.copy.albumTitle === null) {
                 return {
                     $template: '#tplAlbumPlaceholderDisambig',
                     scan: scan,
