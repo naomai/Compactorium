@@ -34,7 +34,6 @@
     <title>Compactorium</title>
 
 <script>
-    let barcodes = <?=json_encode($barcodes)?>;
     let lastBcd = null;
     const hints = new Map();
     hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
@@ -71,7 +70,7 @@
                     }
                     lastBcd = bcd;
                     bcdScanned(bcd);
-                    $("#dbg").text(`code:${bcd} len:${barcodes.length}`);
+                    $("#dbg").text(`code:${bcd} len:${store.barcodes.length}`);
                 }
             });
         }
@@ -115,7 +114,34 @@
 		   const scanInfo=await resp.json();
 		   let status=scanInfo.hasOwnProperty('barcodes');
 		   $("#dbg").text(`status:${status?'OK ':scanInfo.error}`);
-		   barcodes=scanInfo.barcodes;
+		   store.barcodes=scanInfo.barcodes;
+		   reloadView();
+        }
+
+        async function resolveAlbumDisambig(scan, albumSlug) {
+            const query = new URLSearchParams({
+                scan: scan.id
+            });
+
+            const resp=await fetch("api/scan.php?"+query.toString() , {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    albumSlug: albumSlug
+                })
+            });
+
+            store.library = [];
+            store.unresolved = [];
+		    const scanInfo=await resp.json();
+		    let status=scanInfo.hasOwnProperty('barcode');
+		    scan.copy=scanInfo.copy;
+
+            $("#disambigUi")[0].close();
+
+
 		   reloadView();
         }
 
@@ -124,8 +150,8 @@
         function reloadView() {
             const resolvedCheck=(scan) => scan.copy!==null && scan.copy.albumTitle!==null;
 
-            store.library = barcodes.filter((scan)=>resolvedCheck(scan));
-            store.unresolved = barcodes.filter((scan)=>!resolvedCheck(scan));
+            store.library = store.barcodes.filter((scan)=>resolvedCheck(scan));
+            store.unresolved = store.barcodes.filter((scan)=>!resolvedCheck(scan));
 
         }
 
@@ -138,9 +164,8 @@
                 initScanner();
             });
 
-            $(document).on("click", "#scannerCloseBtn", e=>{
+            $("#disambigUi").on("close", (e)=>{
                 stopScanner();
-                $("#scannerUi")[0].close();
             });
 
             
@@ -161,14 +186,18 @@
 
             });
 
-            $("#disambigUi").on("close", (e)=>{
-            store.disambigScan = null;
+            $(document).on("click", "dialog button.dialogClose", function (e) {
+                 $(this).closest("dialog")[0].close();
+            });
 
-            })
+            $("#disambigUi").on("close", (e)=>{
+                store.disambig.scan = null;
+                store.disambig.albumSelection = null;
+            });
         });
 
         function showDisambigSelector(scan) {
-            store.disambigScan = scan;
+            store.disambig.scan = scan;
             $("#disambigUi")[0].showModal();
 
         }
@@ -196,6 +225,22 @@
             };
         }
 
+        function formatIsoDate(iso) {
+            const isoFix = iso.replace(/^\+0{0,2}(?=\d{4}-)/, '');
+            const d = new Date(isoFix);
+
+            
+
+            const formatted =
+                d.getFullYear() + '-' +
+                String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                String(d.getDate()).padStart(2, '0') + ' ' +
+                String(d.getHours()).padStart(2, '0') + ':' +
+                String(d.getMinutes()).padStart(2, '0');
+
+            return formatted;
+        }
+
         function ListViewCopy(copy) {
             const album=mapCopyToAlbum(copy);
             if(album !== null) {
@@ -215,6 +260,16 @@
 
         function ListViewCopyPlaceholder(copy) {
             return {};
+        }
+
+        /* DISAMBIGUATION */
+
+        function DisambigViewAlbum(album, disambig) {
+            return {
+                $template: '#tplDisambigAlbum',
+                album: album,
+                disambig: disambig,
+            }
         }
 
 
@@ -240,9 +295,13 @@
         import { reactive, createApp } from 'https://esm.sh/pocket-vue'
 
         store = reactive({
+            barcodes: <?=json_encode($barcodes)?>,
             library: [],
             unresolved: [],
-            disambigScan: null,
+            disambig: {
+                scan: null,
+                albumSelection: null
+            }
         });
 
         createApp({store}).mount();
@@ -274,7 +333,7 @@
         <div class="panel">
             <h2>Unmarked graves</h2>
             <div id="unresolved" v-scope>
-                <div v-for="scan in store.unresolved" v-scope="UnresolvedScanView(scan)" class="unresolvedScan">
+                <div v-for="scan in store.unresolved" v-scope="UnresolvedScanView(scan)" class="unresolvedScan"  @click="showDisambigSelector(scan)">
                 </div>
             </div>
         </div>
@@ -282,6 +341,7 @@
     </main>
 
     <dialog id="scannerUi" class="popup">
+        <button class="dialogClose">x</button>
         
         <h2>Scan barcode...</h2>
         <div id="dbg"></div>
@@ -295,22 +355,28 @@
     </dialog>
 
     <dialog id="disambigUi" class="popup" v-scope>
-        <h2>Select the correct album...</h2>
+        <button class="dialogClose">x</button>
+        <h2>Here lies...</h2>
 
-        <div v-for="album in store.disambigScan.copy.disambiguation.albums"  v-scope="ListViewAlbum(album)" class="album albumCopy">
+        <div v-for="album in store.disambig.scan.copy.disambiguation.albums"  v-scope="DisambigViewAlbum(album, store.disambig)">
+        </div>
+        <div class="dialogActionBar">
+            <button :disabled="store.disambig.albumSelection===null" @click="resolveAlbumDisambig(store.disambig.scan, store.disambig.albumSelection)">OK</button>
         </div>
     </dialog>
 
     <template id="tplAlbumPlaceholderBarcode">
-        {{scan.barcode}}
+        {{scan.barcode}} {{formatIsoDate(scan.scanned_at)}}
     </template>
 
     <template id="tplAlbumPlaceholderDisambig">
-        <div class='disambigRow'>
-            <div v-for="album in scan.copy.disambiguation.albums" class="disambigPreview">
+        <div class="scanDate">{{formatIsoDate(scan.scanned_at)}}</div>
+        <div class="scanBcd">{{scan.barcode}}</div>
+        <div class="disambigCovers">
+            <div v-for="album in scan.copy.disambiguation.albums.slice(0, 4)" class="disambigPreview">
                 <img :src="album.image!==null ? `cover.php?src=${album.image}` : `assets/img/placeholder.png`" :alt="`[${album.artist} - ${album.title}]`" class='cover' />
             </div>
-            <button @click="showDisambigSelector(scan)">Multiple albums</button>
+            <div v-if="scan.copy.disambiguation.albums.length > 6" class="disambigPreview moreCounter"> +{{scan.copy.disambiguation.albums.length-4}}</div>
         </div>
     </template>
 
@@ -324,6 +390,12 @@
 
     </template>
 
+    <template id="tplDisambigAlbum">
+        <label class='disambigItem'>
+            <div v-scope="ListViewAlbum(album)" class="album albumCopy"></div>
+            <input type="radio" name="disambigAlbumSelection" :value="album.slug" class="disambigCheckbox" v-model="disambig.albumSelection" />
+        </label>
+    </template>
 
 </body>
 </html>

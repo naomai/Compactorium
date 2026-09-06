@@ -12,6 +12,10 @@
 		max-width: 960px;
 		margin: 1em auto;
 	}
+
+	body {
+		overscroll-behavior: contain;
+	}
 	
 	table{
 		border: 1pt solid black;
@@ -89,6 +93,38 @@
 		max-width: 720px;
 	}
 
+	button {
+		margin: 1px;
+		padding: 5px 7px;
+  		box-shadow: 
+			inset -1px -1px 0px #808080, 
+			inset 1px 1px 0px #FFFFFF, 
+			inset -2px -2px 0px #808080, 
+			inset 2px 2px 0px #FFFFFF, 
+			-1px 0px 0px #000000, 
+			1px 0px 0px #000000, 
+			0px -1px 0px #000000, 
+			0px 1px 0px #000000;
+		background-color: #c0c0c0;
+		border: none;
+
+		&:active {
+			box-shadow: inset 1px 1px 0px #808080, -1px 0px 0px #000000, 1px 0px 0px #000000, 0px -1px 0px #000000, 0px 1px 0px #000000;
+		}
+
+	}
+	@media (hover: none) and (pointer: coarse) {
+		button {
+			padding: 8px 10px;
+			min-height: 40px;
+			min-width: 70px;
+
+			font-size: 150%;
+
+		}
+
+	}
+
 
 	#list {
 		display: flex;
@@ -108,21 +144,98 @@
 	}
 
 	#unresolved {
-		.disambigRow {
+		max-width: 640px;
+		margin: 0 auto;
+		padding: 10px;
 
+		.unresolvedScan {
+			cursor: pointer;
+			user-select: none;
+			display: grid;
+			gap: 10px;
+			grid-template-columns:  1fr 100px 100px;
+			padding: 10px;
+
+			border: 1px solid #666;
+
+			&:hover {
+				border: 1px solid #00ffff;
+
+			}
+
+ 			.scanDate {
+				order: 3;
+			}
+ 			.scanBcd {
+				order: 2;
+			}
+
+			.disambigCovers {
+				order: 1;
+				display: grid;
+				grid-template-columns:  repeat(5, calc(100%/6));
+				gap: 5px;
+
+
+				.disambigPreview {
+					.cover {
+						width: 100%;
+					}
+				}
+
+				.disambigPreview.moreCounter {
+					text-align: center;
+					font-size: 12pt;
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+				}
+			}
 		}
 
-		.disambigPreview {
+	}
+
+	dialog {
+		--bg: #c0c0c0;
+		--dkshadow: oklch(from var(--bg) calc(l / 4) c h);
+		--shadow: oklch(from var(--bg) calc(l / 2) c h);
+		--light: oklch(from var(--bg) calc(l / 2 + 0.5) c h);
+		--hilight: oklch(from var(--bg) calc(l / 4 + 0.75) c h);
+
+		background-color: var(--bg);
+		box-shadow: inset -1px -1px 0px var(--dkshadow), inset 1px 1px 0px var(--light), inset -2px -2px 0px var(--shadow), inset 2px 2px 0px var(--hilight);
+		border: none;
+
+		position: relative;
+
+		&::backdrop {
+			overflow: hidden;
+			overscroll-behavior: contain;
+		}
+
+		.dialogActionBar {
+			text-align: center;
+			margin-top: 10px;
+		}
+
+		.dialogClose {
+			position: absolute;
+			top: 2px;
+			right: 2px;
 			width: 32px;
-			display: inline-block;
-			
-			.cover {
-				width: 100%;
-			}
+			height: 32px;
+			font-size: 16pt;
 		}
 	}
 
+	body:has(dialog[open]) {
+		overflow: hidden
+	}
+
 	#disambigUi {
+		--bg:  #46296a;
+		color: #DDD;
+
 		.album {
 			display: grid;
 			grid-template-columns: auto 1fr;
@@ -130,6 +243,25 @@
 		}
 		.cover {
 			width: 50px;
+		}
+
+		.disambigItem{
+			display: grid;
+			grid-template-columns: 1fr 20pt;
+
+			border: 1px solid #694f87;
+
+			height: 45pt;
+			align-content: center;
+			min-width: 320px;
+			padding: 5px;
+			box-sizing: border-box;
+
+			&:has(input.disambigCheckbox:checked) {
+				background: #afabb5;
+				border-color: #000000;
+				color: #46296a;
+			}
 		}
 	}
 
