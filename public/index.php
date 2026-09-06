@@ -347,11 +347,6 @@
         <div id="dbg"></div>
 
         <div id="scanner"></div>
-
-        <button class="close-btn" id="scannerCloseBtn">
-            Close
-        </button>
-
     </dialog>
 
     <dialog id="disambigUi" class="popup" v-scope>
