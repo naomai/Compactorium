@@ -164,7 +164,7 @@
                 initScanner();
             });
 
-            $("#disambigUi").on("close", (e)=>{
+            $("#scannerUi").on("close", (e)=>{
                 stopScanner();
             });
 
