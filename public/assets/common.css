@@ -65,7 +65,12 @@
 	.panel {
 		border: 1px solid #666;
 
-		h2{
+		.panelDescription {
+			color: #c0c0c0;
+			text-align: center;
+		}
+
+		h2.panelTitle{
 			outline: 1px solid #666;
 			color: #7a48b8;
 			margin: 0 0 2px 0;
@@ -154,7 +159,7 @@
 			grid-template-columns:  1fr 100px 100px;
 			padding: 10px;
 
-			border: 1px solid #666;
+			border: 1px dashed #666;
 
 			&:hover {
 				border: 1px solid #00ffff;

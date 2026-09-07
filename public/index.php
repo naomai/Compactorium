@@ -327,7 +327,7 @@
     <main>
         <button id='scannerOpenBtn'>Open scanner</button>
         <div class="panel">
-            <h2>Collection</h2>
+            <h2 class='panelTitle'>Collection</h2>
             <div id="list" v-scope>
                 <div v-for="scan in store.library"  v-scope="ListViewCopy(scan.copy)" class="album albumCopy">
                 </div>
@@ -335,7 +335,8 @@
         </div>
 
         <div class="panel">
-            <h2>Unmarked graves</h2>
+            <h2 class='panelTitle'>Unmarked graves</h2>
+            <p class='panelDescription'>Barcodes that match multiple albums. Help them rest in peace.</p>
             <div id="unresolved" v-scope>
                 <div v-for="scan in store.unresolved" v-scope="UnresolvedScanView(scan)" class="unresolvedScan"  @click="showDisambigSelector(scan)">
                 </div>
