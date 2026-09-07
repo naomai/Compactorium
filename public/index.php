@@ -191,13 +191,13 @@
             });
 
             $("#disambigUi").on("close", (e)=>{
-                store.disambig.scan = null;
-                store.disambig.albumSelection = null;
+                editors.disambig.scan = null;
+                editors.disambig.albumSelection = null;
             });
         });
 
         function showDisambigSelector(scan) {
-            store.disambig.scan = scan;
+            editors.disambig.scan = scan;
             $("#disambigUi")[0].showModal();
 
         }
@@ -210,7 +210,7 @@
             return groups[1];
         }
 
-        var store;
+        var store, editors;
 
         function mapCopyToAlbum(copy) {
             if(copy === null || copy.albumTitle === null){
@@ -298,13 +298,17 @@
             barcodes: <?=json_encode($barcodes)?>,
             library: [],
             unresolved: [],
+
+        });
+
+        editors = reactive({
             disambig: {
                 scan: null,
                 albumSelection: null
             }
-        });
+        })
 
-        createApp({store}).mount();
+        createApp({store, editors}).mount();
     </script>
 </head>
 <body>
@@ -353,10 +357,10 @@
         <button class="dialogClose">x</button>
         <h2>Here lies...</h2>
 
-        <div v-for="album in store.disambig.scan.copy.disambiguation.albums"  v-scope="DisambigViewAlbum(album, store.disambig)">
+        <div v-for="album in editors.disambig.scan.copy.disambiguation.albums"  v-scope="DisambigViewAlbum(album, editors.disambig)">
         </div>
         <div class="dialogActionBar">
-            <button :disabled="store.disambig.albumSelection===null" @click="resolveAlbumDisambig(store.disambig.scan, store.disambig.albumSelection)">OK</button>
+            <button :disabled="editors.disambig.albumSelection===null" @click="resolveAlbumDisambig(editors.disambig.scan, editors.disambig.albumSelection)">OK</button>
         </div>
     </dialog>
 
@@ -371,7 +375,7 @@
             <div v-for="album in scan.copy.disambiguation.albums.slice(0, 4)" class="disambigPreview">
                 <img :src="album.image!==null ? `cover.php?src=${album.image}` : `assets/img/placeholder.png`" :alt="`[${album.artist} - ${album.title}]`" class='cover' />
             </div>
-            <div v-if="scan.copy.disambiguation.albums.length > 6" class="disambigPreview moreCounter"> +{{scan.copy.disambiguation.albums.length-4}}</div>
+            <div v-if="scan.copy.disambiguation.albums.length > 4" class="disambigPreview moreCounter"> +{{scan.copy.disambiguation.albums.length-4}}</div>
         </div>
     </template>
 
