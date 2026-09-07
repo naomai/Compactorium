@@ -347,7 +347,7 @@
 
     <dialog id="scannerUi" class="popup">
         <div class='dialogHeader'>
-            <button class="dialogClose">x</button>
+            <button class="dialogClose dialogCtl">⨉</button>
             <h2>Scan barcode...</h2>
         </div>
         <div class='dialogMain'>
@@ -360,7 +360,7 @@
 
     <dialog id="disambigUi" class="popup" v-scope>
         <div class='dialogHeader'>
-            <button class="dialogClose">x</button>
+            <button class="dialogClose dialogCtl">⨉</button>
             <h2>Here lies...</h2>
         </div>
         <div class='dialogMain'>

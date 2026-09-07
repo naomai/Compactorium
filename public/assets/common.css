@@ -116,18 +116,6 @@
 		}
 
 	}
-	@media (hover: none) and (pointer: coarse) {
-		button {
-			padding: 8px 10px;
-			min-height: 40px;
-			min-width: 70px;
-
-			font-size: 150%;
-
-		}
-
-	}
-
 
 	#list {
 		display: flex;
@@ -244,6 +232,8 @@
 		--bg:  #46296a;
 		color: #DDD;
 
+		max-height: 90vh;
+
 		.album {
 			display: grid;
 			grid-template-columns: auto 1fr;
@@ -294,5 +284,24 @@
 			.albumCopy {
 				width: unset;
 			}
+		}
+	}
+
+	@media (hover: none) and (pointer: coarse) {
+		button:not(.dialogCtl) {
+			padding: 8px 10px;
+			min-height: 40px;
+			min-width: 70px;
+
+			font-size: 150%;
+
+		}
+	}
+
+	@media (pointer: coarse) and (width <= 640px) {
+		dialog {
+			height: 95%;
+			width: 100%;
+			max-height: none !important;
 		}
 	}
