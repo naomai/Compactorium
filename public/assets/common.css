@@ -208,11 +208,21 @@
 		background-color: var(--bg);
 		box-shadow: inset -1px -1px 0px var(--dkshadow), inset 1px 1px 0px var(--light), inset -2px -2px 0px var(--shadow), inset 2px 2px 0px var(--hilight);
 		border: none;
-
 		position: fixed;
+
+		overscroll-behavior: none;
+		display: grid;
+		grid-template-rows: auto minmax(0, 1fr) auto;
 
 		&::backdrop {
 			overflow: hidden;
+			overscroll-behavior: none;
+		}
+
+		.dialogMain {
+			overscroll-behavior: none;
+			min-height: 0;
+    		overflow-y: auto;
 		}
 
 		.dialogActionBar {

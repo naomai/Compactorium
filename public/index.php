@@ -346,19 +346,26 @@
     </main>
 
     <dialog id="scannerUi" class="popup">
-        <button class="dialogClose">x</button>
-        
-        <h2>Scan barcode...</h2>
-        <div id="dbg"></div>
+        <div class='dialogHeader'>
+            <button class="dialogClose">x</button>
+            <h2>Scan barcode...</h2>
+        </div>
+        <div class='dialogMain'>
+            <div id="dbg"></div>
 
-        <div id="scanner"></div>
+            <div id="scanner"></div>
+        </div>
+        <div class="dialogActionBar"></div>
     </dialog>
 
     <dialog id="disambigUi" class="popup" v-scope>
-        <button class="dialogClose">x</button>
-        <h2>Here lies...</h2>
-
-        <div v-for="album in editors.disambig.scan.copy.disambiguation.albums"  v-scope="DisambigViewAlbum(album, editors.disambig)">
+        <div class='dialogHeader'>
+            <button class="dialogClose">x</button>
+            <h2>Here lies...</h2>
+        </div>
+        <div class='dialogMain'>
+            <div v-for="album in editors.disambig.scan.copy.disambiguation.albums"  v-scope="DisambigViewAlbum(album, editors.disambig)">
+            </div>
         </div>
         <div class="dialogActionBar">
             <button :disabled="editors.disambig.albumSelection===null" @click="resolveAlbumDisambig(editors.disambig.scan, editors.disambig.albumSelection)">OK</button>
