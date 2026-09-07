@@ -1,6 +1,7 @@
 	html {
 		background: #000d0c;
 	}
+
 	
 	body, table{
 		font-family: tahoma;
@@ -13,9 +14,6 @@
 		margin: 1em auto;
 	}
 
-	body {
-		overscroll-behavior: contain;
-	}
 	
 	table{
 		border: 1pt solid black;
@@ -206,11 +204,10 @@
 		box-shadow: inset -1px -1px 0px var(--dkshadow), inset 1px 1px 0px var(--light), inset -2px -2px 0px var(--shadow), inset 2px 2px 0px var(--hilight);
 		border: none;
 
-		position: relative;
+		position: fixed;
 
 		&::backdrop {
 			overflow: hidden;
-			overscroll-behavior: contain;
 		}
 
 		.dialogActionBar {
@@ -226,10 +223,6 @@
 			height: 32px;
 			font-size: 16pt;
 		}
-	}
-
-	body:has(dialog[open]) {
-		overflow: hidden
 	}
 
 	#disambigUi {
