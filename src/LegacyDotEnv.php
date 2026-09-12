@@ -1,6 +1,6 @@
 <?php
 namespace Naomai\Compactorium;
-class Config {
+class LegacyDotEnv {
     private static ?\Dotenv\Dotenv $config = null;
 
     public static function init() : void {
