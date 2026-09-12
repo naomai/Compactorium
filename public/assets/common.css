@@ -33,6 +33,10 @@
 		padding: 3px;
 		height: 32px;
 	}
+
+	template, dialog:not([open]){
+		display: none;
+	}
 	
 	a, a:visited{
 		color: #046a77;
@@ -99,6 +103,7 @@
 	button {
 		margin: 1px;
 		padding: 5px 7px;
+		border-radius: 1px;
   		box-shadow: 
 			inset -1px -1px 0px #808080, 
 			inset 1px 1px 0px #FFFFFF, 
@@ -110,6 +115,25 @@
 			0px 1px 0px #000000;
 		background-color: #c0c0c0;
 		border: none;
+
+
+		&:focus {
+			/* box-shadow: 
+				inset -1px -1px 0px #808080, 
+				inset 1px 1px 0px #FFFFFF, 
+				inset -2px -2px 0px #808080, 
+				inset 2px 2px 0px #FFFFFF, 
+				-2px 0px 0px #000000, 
+				2px 0px 0px #000000, 
+				0px -2px 0px #000000, 
+				0px 2px 0px #000000,
+				-1px 1px 0px #000000, 
+				1px -1px 0px #000000, 
+				-1px -1px 0px #000000, 
+				1px 1px 0px #000000; */
+			outline: 2px solid black;
+
+		}
 
 		&:active {
 			box-shadow: inset 1px 1px 0px #808080, -1px 0px 0px #000000, 1px 0px 0px #000000, 0px -1px 0px #000000, 0px 1px 0px #000000;
@@ -137,7 +161,10 @@
 	#unresolved {
 		max-width: 640px;
 		margin: 0 auto;
-		padding: 10px;
+		/* padding: 10px; */
+		border: 1px dashed #666;
+		border-top: 1px solid transparent;
+
 
 		.unresolvedScan {
 			cursor: pointer;
@@ -147,7 +174,8 @@
 			grid-template-columns:  1fr 100px 100px;
 			padding: 10px;
 
-			border: 1px dashed #666;
+			border: 1px solid transparent;
+			border-top: 1px dashed #666;
 
 			&:hover {
 				border: 1px solid #00ffff;
