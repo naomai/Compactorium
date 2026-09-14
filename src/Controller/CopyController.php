@@ -3,8 +3,8 @@
 namespace Naomai\Compactorium\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Naomai\Compactorium\Models\Album;
-use Naomai\Compactorium\Models\Copy;
+use Naomai\Compactorium\Entity\Album;
+use Naomai\Compactorium\Entity\Copy;
 use Naomai\Compactorium\Views\LibraryCopyView;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;

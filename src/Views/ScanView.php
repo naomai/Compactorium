@@ -1,7 +1,7 @@
 <?php
 namespace Naomai\Compactorium\Views;
 
-use Naomai\Compactorium\Models\Scan;
+use Naomai\Compactorium\Entity\Scan;
 
 class ScanView {
     public int $id;

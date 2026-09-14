@@ -1,5 +1,5 @@
 <?php
-namespace Naomai\Compactorium\Models;
+namespace Naomai\Compactorium\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 

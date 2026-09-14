@@ -1,5 +1,5 @@
 <?php
-namespace Naomai\Compactorium\Models;
+namespace Naomai\Compactorium\Entity;
 
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;

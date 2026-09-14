@@ -1,5 +1,5 @@
 <?php
-namespace Naomai\Compactorium\Models;
+namespace Naomai\Compactorium\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

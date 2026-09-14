@@ -2,7 +2,7 @@
 namespace Naomai\Compactorium\Views;
 
 use Doctrine\Common\Collections\Collection;
-use Naomai\Compactorium\Models\Barcode;
+use Naomai\Compactorium\Entity\Barcode;
 
 class AlbumDisambigView {
     public array $albums;

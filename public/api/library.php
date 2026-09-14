@@ -1,8 +1,8 @@
 <?php
 
 use Naomai\Compactorium\Database;
-use Naomai\Compactorium\Models\Copy;
-use Naomai\Compactorium\Models\Library;
+use Naomai\Compactorium\Entity\Copy;
+use Naomai\Compactorium\Entity\Library;
 use Naomai\Compactorium\Request;
 use Naomai\Compactorium\Views\LibraryCopyView;
 

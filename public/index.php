@@ -1,8 +1,8 @@
 <?php
     namespace Naomai\Compactorium;
 
-    use Naomai\Compactorium\Models\Library;
-    use Naomai\Compactorium\Models\Scan;
+    use Naomai\Compactorium\Entity\Library;
+    use Naomai\Compactorium\Entity\Scan;
     use Naomai\Compactorium\Views\ScanView;
 
     require __DIR__ . '/../bootstrap/app.php';

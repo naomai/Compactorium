@@ -2,9 +2,9 @@
 
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Naomai\Compactorium\Database;
-use Naomai\Compactorium\Models\Album;
-use Naomai\Compactorium\Models\Library;
-use Naomai\Compactorium\Models\Scan;
+use Naomai\Compactorium\Entity\Album;
+use Naomai\Compactorium\Entity\Library;
+use Naomai\Compactorium\Entity\Scan;
 use Naomai\Compactorium\Request;
 use Naomai\Compactorium\Views\LibraryCopyView;
 use Naomai\Compactorium\Views\ScanView;

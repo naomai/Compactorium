@@ -1,7 +1,7 @@
 <?php
 namespace Naomai\Compactorium\Views;
 
-use Naomai\Compactorium\Models\Copy;
+use Naomai\Compactorium\Entity\Copy;
 
 class LibraryCopyView {
     public int $id;

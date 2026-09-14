@@ -5,8 +5,8 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Naomai\Compactorium\Logger;
-use Naomai\Compactorium\Models\Album;
-use Naomai\Compactorium\Models\Barcode;
+use Naomai\Compactorium\Entity\Album;
+use Naomai\Compactorium\Entity\Barcode;
 use Naomai\Compactorium\Slugger;
 
 class AlbumResolver {

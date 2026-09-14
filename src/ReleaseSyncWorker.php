@@ -3,8 +3,8 @@
 
     use DateTimeImmutable;
     use Doctrine\ORM\EntityManagerInterface;
-    use Naomai\Compactorium\Models\Copy;
-    use Naomai\Compactorium\Models\Scan;
+    use Naomai\Compactorium\Entity\Copy;
+    use Naomai\Compactorium\Entity\Scan;
     use Naomai\Compactorium\Services\AlbumResolver;
 
 

@@ -1,7 +1,7 @@
 <?php
 namespace Naomai\Compactorium\Views;
 
-use Naomai\Compactorium\Models\Album;
+use Naomai\Compactorium\Entity\Album;
 
 class AlbumBasicView {
     public string $slug;
