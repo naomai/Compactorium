@@ -2,7 +2,6 @@
     "name": "naomai/compactorium",
     "require": {
         "delight-im/auth": "^9.0",
-        "vlucas/phpdotenv": "^5.6",
         "symfony/var-exporter": "^7.0",
         "symfony/framework-bundle": "^8.0",
         "symfony/runtime": "^8.1",

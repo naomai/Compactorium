@@ -1,12 +1,15 @@
 <?php
 namespace Naomai\Compactorium;
+
+use Symfony\Component\Dotenv\Dotenv;
+
 class LegacyDotEnv {
-    private static ?\Dotenv\Dotenv $config = null;
+    private static ?Dotenv $config = null;
 
     public static function init() : void {
         $_ENV["BASE_DIR"] = realpath(__DIR__ . "/..");
-        self::$config = \Dotenv\Dotenv::createImmutable(__DIR__."/..");
-        self::$config->safeLoad();
+        self::$config = new Dotenv(); 
+        self::$config->load(__DIR__."/../.env");
     }
 
     public static function get(string $variable) : ?string {
