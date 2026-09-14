@@ -15,7 +15,7 @@ class Database {
 
     public static function init() : void {
         
-        $dsn = LegacyDotEnv::get("DB_DSN");
+        $dsn = LegacyDotEnv::get("DATABASE_URL");
 
         if($dsn===null) {
             throw new \Exception("Database connection is not configured");
