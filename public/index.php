@@ -54,6 +54,21 @@
     <title>Compactorium</title>
 
 <script>
+    /* LOCAL CONFIG */
+    const configKey = 'compactorium-config';
+
+    function getConfig(key, defaultValue = null) {
+        const config = JSON.parse(localStorage.getItem(configKey) ?? '{}');
+        return config[key] ?? defaultValue;
+    }
+
+    function setConfig(key, value) {
+        const config = JSON.parse(localStorage.getItem(configKey) ?? '{}');
+        config[key] = value;
+        localStorage.setItem(configKey, JSON.stringify(config));
+    }
+
+
     let lastBcd = null;
     const hints = new Map();
     hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
@@ -235,11 +250,8 @@
 
 
         function reloadView() {
-            /*const resolvedCheck=(scan) => scan.copy!==null && scan.copy.albumTitle!==null;
-
-            store.library = store.barcodes.filter((scan)=>resolvedCheck(scan));
-            store.unresolved = store.barcodes.filter((scan)=>!resolvedCheck(scan));*/
-
+            const viewId = getConfig("libraryViewId", "artist");
+            store.libraryView = applyView(store.library, sortViews[viewId]);
         }
 
         function fullReload() {
@@ -251,7 +263,8 @@
                 })
                 .then(resp=>resp.json())
                 .then((scans)=>{
-                    store.unresolved = scans.barcodes
+                    store.unresolved = scans.barcodes;
+                    reloadView();
                 }
             );
 
@@ -261,7 +274,8 @@
                 })
                 .then(resp=>resp.json())
                 .then((library)=>{
-                    store.library = library.copies
+                    store.library = library.copies;
+                    reloadView();
                 }
             );
         }
@@ -364,6 +378,59 @@
             };
         }
 
+        /* SORTING */
+
+        const sortViews = {
+            artist: {
+                group: { by: 'artist', sort: 'asc' },
+                sort: { by: 'year', direction: 'asc' }
+            },
+
+            added: {
+                sort: { by: 'created_at', direction: 'desc' }
+            },
+        };
+
+        function applyView(copies, view) {
+            function sortBy(items, { by, direction = 'asc' }) {
+                return Array.from(items).sort((a, b) => {
+                    const av = a[by].toLocaleLowerCase();
+                    const bv = b[by].toLocaleLowerCase();
+
+                    return direction === 'asc'
+                        ? av > bv ? 1 : av < bv ? -1 : 0
+                        : av < bv ? 1 : av > bv ? -1 : 0;
+                });
+            }
+
+            function groupBy(items, { by }) {
+                return Object.groupBy(items, item => item[by]);
+            }
+
+            function compare(av, bv, direction) {
+                    return direction === 'asc'
+                ? av > bv ? 1 : av < bv ? -1 : 0
+                : av < bv ? 1 : av > bv ? -1 : 0;
+            }
+
+
+            let groups;
+            if(view.group !== undefined) {
+                groups = Object.groupBy(copies, item => item[view.group.by]);
+            } else {
+                groups = {"#": copies};
+            }
+
+            return Object.entries(groups)
+                .sort(([a], [b]) =>
+                    compare(a.toLocaleLowerCase(), b.toLocaleLowerCase(), view.group.sort)
+                )
+                .map(([key, items]) => ({
+                    key,
+                    items: sortBy(items, view.sort)
+                }));
+        }
+
         function formatIsoDate(iso) {
             const isoFix = iso.replace(/^\+0{0,2}(?=\d{4}-)/, '');
             const d = new Date(isoFix);
@@ -449,6 +516,7 @@
         store = reactive({
             library: <?=json_encode($libraryContents)?>,
             unresolved: <?=json_encode($unresolvedBarcodes)?>,
+            libraryView: [],
             libraryId: <?=(int)$libraryId ?>
         });
 
@@ -486,8 +554,10 @@
         <button id='manualAddOpenBtn'>+ Manual add</button>
         <div class="panel">
             <h2 class='panelTitle'>Collection</h2>
-            <div id="list" v-scope>
-                <div v-for="copy in store.library"  v-scope="ListViewCopy(copy)" class="album albumCopy">
+            <div id="groupedList" v-scope>
+                <div v-for="group in store.libraryView" class="copyGroup">
+                    <h3 v-if="group.key !== '#'">{{group.key}}</h3>
+                    <div v-for="copy in group.items"  v-scope="ListViewCopy(copy)" class="album albumCopy"></div>
                 </div>
             </div>
         </div>

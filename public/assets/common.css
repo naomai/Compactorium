@@ -141,11 +141,16 @@
 
 	}
 
-	#list {
+	.copyGroup {
 		display: flex;
+		flex-direction: row;
 		flex-wrap: wrap;
-		justify-content: center;
+		/*justify-content: center;*/
 		align-items: stretch;
+
+		&>h3 {
+			flex: 0 0 100%;
+		}
 
 		.albumCopy {
 			display: inline-block;
@@ -314,7 +319,7 @@
 			}
 		}
 
-		#list {
+		.copyGroup {
 			display: grid;
 			grid-template-columns: 1fr 1fr;
 
