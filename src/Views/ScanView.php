@@ -14,7 +14,7 @@ class ScanView {
 
         $view->id = $scan->id;
         $view->barcode = $scan->barcode;
-        $view->scanned_at = $scan->scannedAt->format(\DateTimeInterface::ISO8601_EXPANDED);
+        $view->scanned_at = $scan->scannedAt->format(\DateTimeInterface::ATOM);
         $view->copy = LibraryCopyView::fromCopy($scan?->copy);
 
 

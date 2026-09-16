@@ -10,6 +10,7 @@ class LibraryCopyView {
     public ?string $artist;
     public ?string $year;
     public ?string $image;
+    public string $created_at;
     public ?AlbumDisambigView $disambiguation;
 
     public static function fromCopy(?Copy $copy) : ?self {
@@ -27,7 +28,7 @@ class LibraryCopyView {
         $view->artist = $album?->artist;
         $view->year = $album?->year;
         $view->image = $album?->image;
-
+        $view->created_at = $copy->createdAt->format(\DateTimeInterface::ATOM);
 
         if($copy->scan !== null) {
             $disambig = AlbumDisambigView::fromBarcodesCollection($copy->scan->barcodes);
