@@ -9,12 +9,30 @@ use Naomai\Compactorium\Entity\Album;
 use Naomai\Compactorium\Entity\Barcode;
 use Naomai\Compactorium\Slugger;
 
+/**
+ * Resolves album metadata and creates persistent Album entities.
+ */
 class AlbumResolver {
     private EntityManagerInterface $em;
+
+    /**
+     * Initializes with a Doctrine Entity Manager.
+     *
+     * @param EntityManagerInterface $em Doctrine Entity Manager
+     */
     public function __construct(EntityManagerInterface $em) {
         $this->em = $em;
     }
 
+    /**
+     * Resolves a barcode to matching Album objects.
+     *
+     * Uses stored barcode data when available, otherwise fetches album metadata
+     * from external sources.
+     *
+     * @param string $bcd Barcode to resolve.
+     * @return array<int, Album> Matching Album objects.
+     */
     public function resolveBarcode(string $bcd) : array {
         $bcds = $this->em
             ->getRepository(Barcode::class)
@@ -37,6 +55,15 @@ class AlbumResolver {
         return $albums;
     }
 
+    /**
+     * Downloads and stores album metadata for a barcode.
+     *
+     * Searches external services for matching album data, then creates
+     * persistent Album entities from the results.
+     *
+     * @param string $bcd Barcode to search for.
+     * @return array<int, Album> Albums resolved from the barcode.
+     */
     public function downloadMetadataForBarcode(string $bcd) : array {
         Logger::debug("AlbumResolver", "search bcd {$bcd}");
         $albDiscogs = Discogs::searchBarcode($bcd);
@@ -75,6 +102,12 @@ class AlbumResolver {
         return $albums;
     }
 
+    /**
+     * Gets the front cover image for an Album.
+     *
+     * @param Album $album Album entity to get the cover for.
+     * @return string|null Local path to the cover image, or null if unavailable.
+     */
     public function getFrontCover(Album $album) : ?string {
         if(isset($album->rawJson->discogs->images[0])) {
             return Discogs::getFrontCover((object)$album->rawJson->discogs);
@@ -85,6 +118,13 @@ class AlbumResolver {
         return null;
     }
 
+    /**
+     * Creates and stores an Album and its barcode from raw metadata.
+     *
+     * @param object $albumData Raw JSON metadata combined from external sources.
+     * @param string $bcd Barcode associated with the album.
+     * @return Album Persisted Album entity.
+     */
     private function saveAlbum(object $albumData, string $bcd) : Album {
         $em = $this->em;
 
