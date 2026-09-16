@@ -19,23 +19,18 @@ try {
         case "GET":
             $request = Request::get();
             $libraryId = $request->int("library", 0);
-            /*$stm = $db->prepare("SELECT * FROM `copies` WHERE `library_id`=:library_id");
-            $stm->execute(['library_id' => $libraryId]);
-            $response = [
-                'albums' => $stm->fetchAll(\PDO::FETCH_ASSOC)
-            ];*/
-            
+
             $library = $em->find(Library::class, $libraryId);
-            
-            /*$albums = $em->getRepository(Copy::class)->findBy([
-                'library' => $library
-            ]);*/
+
+            $copiesList = $library->copies->getValues();
+
+            $copiesMapped = array_map(
+                fn($copy) => LibraryCopyView::fromCopy($copy),
+                $copiesList
+            );
             
             $response = [
-                'albums' => array_map(
-                    fn($copy) => LibraryCopyView::fromCopy($copy),
-                    $library->copies->getValues()
-                )
+                'copies' => $copiesMapped
             ];
             
             
