@@ -11,7 +11,7 @@ final class DiscogsApiTest extends TestCase{
         $this->initDiscogs();
         
         $client = new Http\ClientStub();
-        Discogs::SetHttpClient($client);
+        Discogs::setHttpClient($client);
 
         $client->urlMapping = [
             "#//api\.discogs\.com/database/search\?.*barcode=0194398819426#" => [
@@ -24,7 +24,7 @@ final class DiscogsApiTest extends TestCase{
             ]
         ];
 
-        $info = Discogs::SearchBarcode("0194398819426");
+        $info = Discogs::searchBarcode("0194398819426");
 
         $this->assertContainsOnlyObject($info);
         $this->assertObjectHasProperty('title', $info[0]);

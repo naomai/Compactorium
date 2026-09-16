@@ -39,7 +39,7 @@ class AlbumResolver {
 
     public function downloadMetadataForBarcode(string $bcd) : array {
         Logger::debug("AlbumResolver", "search bcd {$bcd}");
-        $albDiscogs = Discogs::SearchBarcode($bcd);
+        $albDiscogs = Discogs::searchBarcode($bcd);
 
         $mastersCount = $albDiscogs!==null ? count($albDiscogs) : 0;
         Logger::debug("AlbumResolver", "found releases({$mastersCount})");

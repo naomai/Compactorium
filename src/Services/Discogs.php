@@ -22,7 +22,7 @@ class Discogs {
             httpTooManyRequestsCode: 429
         );
 
-        self::SetHttpClient($client);
+        self::setHttpClient($client);
     }
 
     /**
@@ -31,7 +31,7 @@ class Discogs {
      * @param string $bcd Barcode to search for.
      * @return array<int, object>|null Matching Discogs Release/Master objects, or null if no matches are found.
      */
-    public static function SearchBarcode(string $bcd) : ?array {
+    public static function searchBarcode(string $bcd) : ?array {
         $urlArgs = [
             'barcode'=>"{$bcd}",
             'type'=>"release",
@@ -74,7 +74,7 @@ class Discogs {
         $masterUrls = array_unique($masterUrls);
 
         $masters = array_map(
-            fn($releaseUrl) => self::GetReleaseFromUrl($releaseUrl), 
+            fn($releaseUrl) => self::getReleaseFromUrl($releaseUrl), 
             $masterUrls
         );
 
@@ -90,7 +90,7 @@ class Discogs {
      *
      * @throws InvalidArgumentException If the URL is not a valid Discogs URL.
      */
-    public static function GetReleaseFromUrl(string $url) : object {
+    public static function getReleaseFromUrl(string $url) : object {
         Logger::debug("Discogs", "GetReleaseFromUrl: {$url}");
         $apiUrl = Discogs::resolveApiUrlFromUrl($url);
 
@@ -100,23 +100,23 @@ class Discogs {
 
         $master = self::$client->getJson($apiUrl);
 
-        return self::ValidateRelease($master);
+        return self::validateRelease($master);
     }
 
-    private static function ValidateRelease(object $release) : object {
+    private static function validateRelease(object $release) : object {
         if(!property_exists($release, 'title')) {
             throw new \Exception("Discogs error: {$release->message}");
         }
 
         return $release;        
     }
-    
+
     /**
      * Sets the HTTP client used by the Discogs class.
      *
      * @param HttpClient $client HTTP client to use for requests.
      */
-    public static function SetHttpClient(HttpClient $client) : void {
+    public static function setHttpClient(HttpClient $client) : void {
         self::$client = $client;
     }
 
