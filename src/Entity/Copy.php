@@ -33,9 +33,9 @@ class Copy {
     #[ORM\JoinColumn(
         name: 'scan_id', 
         referencedColumnName: 'id', 
-        nullable: false,
+        nullable: true,
     )]
-    public Scan $scan;
+    public ?Scan $scan;
 
     #[ORM\ManyToOne(targetEntity: Album::class)]
     #[ORM\JoinColumn(
