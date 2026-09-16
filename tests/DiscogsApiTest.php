@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Tests;
 
+use Naomai\Compactorium\LegacyDotEnv;
 use Naomai\Compactorium\Logger;
 use Naomai\Compactorium\Services\Discogs;
 use PHPUnit\Framework\TestCase;
@@ -32,10 +33,41 @@ final class DiscogsApiTest extends TestCase{
         //print_r($info);
     }
 
+    public function testApiUrlResolution() : void {
+        $this->initDiscogs();
+
+        $apiEndpoint = Discogs::API_ENDPOINT;
+
+        $url = Discogs::resolveApiUrlFromUrl("https://www.discogs.com/master/4894-Black-Sabbath-Black-Sabbath-Vol-4?format=CD");
+        $this->assertIsString($url, "master api url is string");
+        $this->assertEquals("{$apiEndpoint}/masters/4894", $url, "master api url correct");
+
+        $url = Discogs::resolveApiUrlFromUrl("https://www.discogs.com/release/15266573-Black-Nail-Cabaret-Gods-Verging-On-Sanity");
+        $this->assertIsString($url, "release api url is string");
+        $this->assertEquals("{$apiEndpoint}/releases/15266573", $url, "release api url correct");
+
+        $url = Discogs::resolveApiUrlFromUrl("https://www.discogs.com/master/xyzabs234");
+        $this->assertNull($url, "master api url invalid");
+
+        $url = Discogs::resolveApiUrlFromUrl("https://www.discogs.com/release/xyzabs234");
+        $this->assertNull($url, "release api url invalid");
+
+        $url = Discogs::resolveApiUrlFromUrl("https://www.discogs.com/artist/3543255-Black-Nail-Cabaret");
+        $this->assertNull($url, "release api url unsupported types");
+
+        
+        $url = Discogs::resolveApiUrlFromUrl("https://www.discongs.com/master/4894-Black-Sabbath-Black-Sabbath-Vol-4?format=CD");
+        $this->assertNull($url, "api url invalid domain");
+
+        $url = Discogs::resolveApiUrlFromUrl("/master/4894-Black-Sabbath-Black-Sabbath-Vol-4?format=CD");
+        $this->assertNull($url, "api url malformed");
+    }
+
 
 
     private function initDiscogs() {
         Logger::init();
+        LegacyDotEnv::init();
         Discogs::init();
     }
 }

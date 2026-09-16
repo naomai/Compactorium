@@ -1,6 +1,7 @@
 <?php
 namespace Naomai\Compactorium\Services;
 
+use InvalidArgumentException;
 use Naomai\Compactorium\Http\CurlClient;
 use Naomai\Compactorium\Http\HttpClient;
 use Naomai\Compactorium\Http\RateLimiter;
@@ -8,6 +9,8 @@ use Naomai\Compactorium\Logger;
 
 class Discogs {
     private static HttpClient $client;
+
+    const API_ENDPOINT = "https://api.discogs.com";
 
 
     public static function init() : void {
@@ -110,5 +113,61 @@ class Discogs {
         return CoverArtStore::downloadCover($artist, $title, $imageUrl, client: self::$client);
 
         
+    }
+
+    public static function resolveApiUrlFromUrl(string $url) : ?string {
+        $parsed = parse_url($url);
+
+        if(!isset($parsed['host'])) {
+            return null;
+        }
+
+        if(strtolower($parsed['host']) == "api.discogs.com") {
+            return $url;
+        }
+
+
+        if (!in_array(strtolower($parsed['host']), ['discogs.com', 'www.discogs.com'], true)) {
+            return null;
+        }
+
+        $path = array_values(array_filter(
+            explode('/', trim($parsed['path'] ?? '', '/')),
+            static fn(string $part) => $part !== ''
+        ));
+
+        if(count($path)!=2) {
+            return null;
+        }
+
+        $apiUrl = null;
+
+        switch($path[0]) {
+            case "master":
+                if (!preg_match('/^(\d+)-/', $path[1], $matches)) {
+                    return null;
+                }
+                $id = (int)$matches[1];
+
+                $apiUrl = Discogs::API_ENDPOINT . "/masters/" . $id;
+
+
+                break;
+            case "release":
+                if (!preg_match('/^(\d+)-/', $path[1], $matches)) {
+                    return null;
+                }
+                $id = (int)$matches[1];
+
+                $apiUrl = Discogs::API_ENDPOINT . "/releases/" . $id;
+
+
+                break;
+
+        }
+
+        return $apiUrl;
+
+
     }
 }
