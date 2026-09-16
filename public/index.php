@@ -165,6 +165,73 @@
 		   reloadView();
         }
 
+        async function manualAddSubmit(manualAddContext) {
+            const editor = editors.manualAdd;
+
+            if(manualAddContext.url != "") {
+                const request = {
+                    discogsUrl: manualAddContext.url,
+                };
+
+                let error = null;
+
+                if(editor.targetScan !== null) {
+                    const scanId = editor.targetScan.id
+                    const resp=await fetch("api/scan.php?scan=" + scanId , {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(request)
+                    });
+
+                    const respObj = await resp.json();
+                    error = respObj.error;
+
+                    if(!error) {
+                        fullReload(); // TODO partial reload
+                    }
+
+                } else {
+                    let resp;
+                    if(editor.targetCopy !== null) {
+                        const copyId = editor.targetCopy.id
+
+                        resp=await fetch("api/copy/" + copyId , {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(request)
+                        });
+                    } else {
+                        request.library = store.libraryId;
+
+                        resp=await fetch("api/copy/" , {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(request)
+                        });
+                    }
+
+                    const respObj = await resp.json();
+                    error = respObj.error;
+
+                    if(!error) {
+                        store.library.push(respObj);
+                    }
+                }
+
+                if(error) {
+                    editor.error = error;
+                } else {
+                    $("#manualAddUi")[0].close();
+                }
+            }
+        }
+
 
 
         function reloadView() {
@@ -173,6 +240,30 @@
             store.library = store.barcodes.filter((scan)=>resolvedCheck(scan));
             store.unresolved = store.barcodes.filter((scan)=>!resolvedCheck(scan));*/
 
+        }
+
+        function fullReload() {
+            store.unresolved = [];
+            store.library = [];
+            fetch("api/scan.php?type=unresolved&library=" + store.libraryId, 
+                {
+                    method: "GET",
+                })
+                .then(resp=>resp.json())
+                .then((scans)=>{
+                    store.unresolved = scans.barcodes
+                }
+            );
+
+            fetch("api/library.php?library=" + store.libraryId, 
+                {
+                    method: "GET",
+                })
+                .then(resp=>resp.json())
+                .then((library)=>{
+                    store.library = library.copies
+                }
+            );
         }
 
         $(document).ready(()=>{
@@ -188,6 +279,15 @@
                 stopScanner();
             });
 
+            $(document).on("click", "#manualAddOpenBtn", e=>{
+                showManualAddUi({});
+            });
+            $("#manualAddUi").on("close", (e)=>{
+                editors.manualAdd.url = "";
+                editors.manualAdd.error = "";
+                editors.manualAdd.targetCopy = null;
+                editors.manualAdd.targetScan = null;
+            });
             
             $(document).on("dblclick", ".popup", function (e) {
 
@@ -216,10 +316,29 @@
             });
         });
 
+        function showDisambigAction(scan) {
+            if(scan.copy === null) {
+                showManualAddUi({scan: scan});
+            } else {
+                showDisambigSelector(scan);
+            }
+        }
+
         function showDisambigSelector(scan) {
             editors.disambig.scan = scan;
             $("#disambigUi")[0].showModal();
 
+        }
+
+        function showManualAddUi(context) {
+            editors.manualAdd.targetCopy = null;
+            editors.manualAdd.targetScan = null;
+            if(context.copy) {
+                editors.manualAdd.targetCopy = context.copy;
+            } else if(context.scan) {
+                editors.manualAdd.targetScan = context.scan;
+            }
+            $("#manualAddUi")[0].showModal();
         }
 
         function formatArtistName(name) {
@@ -261,9 +380,16 @@
             return formatted;
         }
 
+        const EMPTY_TEMPLATE = {
+            $template: '#tplEmpty'
+        };
+
         function ListViewCopy(copy) {
+            if(!copy) {
+                return EMPTY_TEMPLATE;
+            }
             const album=mapCopyToAlbum(copy);
-            if(album !== null) {
+            if(album) {
                 return ListViewAlbum(album);
             }
 
@@ -272,6 +398,9 @@
         }
 
         function ListViewAlbum(album) {
+            if(!album) {
+                return EMPTY_TEMPLATE;
+            }
             return {
                 $template: '#tplAlbumCopy',
                 album: album,
@@ -279,7 +408,7 @@
         }
 
         function ListViewCopyPlaceholder(copy) {
-            return {};
+            return EMPTY_TEMPLATE;
         }
 
         /* DISAMBIGUATION */
@@ -294,6 +423,9 @@
 
 
         function UnresolvedScanView(scan) {
+            if(!scan) {
+                return EMPTY_TEMPLATE;
+            }
             if(scan.copy === null) {
                 return {
                     $template: '#tplAlbumPlaceholderBarcode',
@@ -307,7 +439,7 @@
                 }
             } 
 
-            return {};
+            return EMPTY_TEMPLATE;
         }
         
     </script>
@@ -317,13 +449,19 @@
         store = reactive({
             library: <?=json_encode($libraryContents)?>,
             unresolved: <?=json_encode($unresolvedBarcodes)?>,
-
+            libraryId: <?=(int)$libraryId ?>
         });
 
         editors = reactive({
             disambig: {
                 scan: null,
                 albumSelection: null
+            },
+            manualAdd: {
+                targetCopy: null,
+                targetScan: null,
+                url: "",
+                error: "",
             }
         })
 
@@ -345,6 +483,7 @@
     </header>
     <main>
         <button id='scannerOpenBtn'>Open scanner</button>
+        <button id='manualAddOpenBtn'>+ Manual add</button>
         <div class="panel">
             <h2 class='panelTitle'>Collection</h2>
             <div id="list" v-scope>
@@ -357,7 +496,7 @@
             <h2 class='panelTitle'>Unmarked graves</h2>
             <p class='panelDescription'>Barcodes that match multiple albums. Help them rest in peace.</p>
             <div id="unresolved" v-scope>
-                <div v-for="scan in store.unresolved" v-scope="UnresolvedScanView(scan)" class="unresolvedScan"  @click="showDisambigSelector(scan)">
+                <div v-for="scan in store.unresolved" v-scope="UnresolvedScanView(scan)" class="unresolvedScan clickable"  @click="showDisambigAction(scan)">
                 </div>
             </div>
         </div>
@@ -377,6 +516,29 @@
         <div class="dialogActionBar"></div>
     </dialog>
 
+    <dialog id="manualAddUi" class="popup" v-scope="{editor: editors.manualAdd}">
+        <div class='dialogHeader'>
+            <button class="dialogClose dialogCtl">⨉</button>
+            <h2>Add manually...</h2>
+        </div>
+        <div class='dialogMain'>
+            <div v-if="editor.targetCopy !== null">
+                Selected copy with multiple matches...
+                <div v-scope="ListViewCopy(editor.targetCopy)" class="album albumCopy"></div>
+            </div>
+            <div v-else-if="editor.targetScan !== null">
+                Selected scan with no matches...
+                <div v-scope="UnresolvedScanView(editor.targetScan)" class="unresolvedScan"></div>
+            </div>
+            <label for="manualAddUrl">Discogs URL</label> <input type="url" name="manualAddUrl" v-model="editor.url"/>
+        </div>
+
+        <div id="manualAddError" v-model="editor.error"></div>
+        <div class="dialogActionBar">
+            <button :disabled="editor.url==''" @click="manualAddSubmit(editor)">OK</button>
+        </div>
+    </dialog>
+
     <dialog id="disambigUi" class="popup" v-scope>
         <div class='dialogHeader'>
             <button class="dialogClose dialogCtl">⨉</button>
@@ -388,6 +550,8 @@
         </div>
         <div class="dialogActionBar">
             <button :disabled="editors.disambig.albumSelection===null" @click="resolveAlbumDisambig(editors.disambig.scan, editors.disambig.albumSelection)">OK</button>
+            <button @click="showManualAddUi({copy: editors.disambig.scan.copy})">Not on the list</button>
+
         </div>
     </dialog>
 
@@ -421,6 +585,9 @@
             <div v-scope="ListViewAlbum(album)" class="album albumCopy"></div>
             <input type="radio" name="disambigAlbumSelection" :value="album.slug" class="disambigCheckbox" v-model="disambig.albumSelection" />
         </label>
+    </template>
+
+    <template id="tplEmpty">
     </template>
 
 </body>

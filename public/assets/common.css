@@ -164,54 +164,54 @@
 		/* padding: 10px; */
 		border: 1px dashed #666;
 		border-top: 1px solid transparent;
+	}
 
+	.unresolvedScan {
+		display: grid;
+		gap: 10px;
+		grid-template-columns:  1fr 100px 100px;
+		padding: 10px;
 
-		.unresolvedScan {
+		border: 1px solid transparent;
+		border-top: 1px dashed #666;
+
+		&.clickable {
 			cursor: pointer;
 			user-select: none;
-			display: grid;
-			gap: 10px;
-			grid-template-columns:  1fr 100px 100px;
-			padding: 10px;
-
-			border: 1px solid transparent;
-			border-top: 1px dashed #666;
-
 			&:hover {
 				border: 1px solid #00ffff;
-
-			}
-
- 			.scanDate {
-				order: 3;
-			}
- 			.scanBcd {
-				order: 2;
-			}
-
-			.disambigCovers {
-				order: 1;
-				display: grid;
-				grid-template-columns:  repeat(5, calc(100%/6));
-				gap: 5px;
-
-
-				.disambigPreview {
-					.cover {
-						width: 100%;
-					}
-				}
-
-				.disambigPreview.moreCounter {
-					text-align: center;
-					font-size: 12pt;
-					display: flex;
-					flex-direction: column;
-					justify-content: center;
-				}
+	
 			}
 		}
 
+		.scanDate {
+			order: 3;
+		}
+		.scanBcd {
+			order: 2;
+		}
+
+		.disambigCovers {
+			order: 1;
+			display: grid;
+			grid-template-columns:  repeat(5, calc(100%/6));
+			gap: 5px;
+
+
+			.disambigPreview {
+				.cover {
+					width: 100%;
+				}
+			}
+
+			.disambigPreview.moreCounter {
+				text-align: center;
+				font-size: 12pt;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+			}
+		}
 	}
 
 	dialog {
@@ -288,6 +288,15 @@
 				border-color: #000000;
 				color: #46296a;
 			}
+		}
+	}
+
+	#manualAddUi {
+		--bg:  #46296a;
+		color: #DDD;
+		
+		.unresolvedScan {
+			max-width: 400px;
 		}
 	}
 
