@@ -38,6 +38,7 @@ final class DiscogsApiTest extends TestCase{
 
         $apiEndpoint = Discogs::API_ENDPOINT;
 
+        // POSITIVE
         $url = Discogs::resolveApiUrlFromUrl("https://www.discogs.com/master/4894-Black-Sabbath-Black-Sabbath-Vol-4?format=CD");
         $this->assertIsString($url, "master api url is string");
         $this->assertEquals("{$apiEndpoint}/masters/4894", $url, "master api url correct");
@@ -46,6 +47,11 @@ final class DiscogsApiTest extends TestCase{
         $this->assertIsString($url, "release api url is string");
         $this->assertEquals("{$apiEndpoint}/releases/15266573", $url, "release api url correct");
 
+        $url = Discogs::resolveApiUrlFromUrl("https://api.discogs.com/releases/15266573");
+        $this->assertIsString($url, "api url from api url is string");
+        $this->assertEquals("{$apiEndpoint}/releases/15266573", $url, "api url from api url correct");
+
+        // NEGATIVE
         $url = Discogs::resolveApiUrlFromUrl("https://www.discogs.com/master/xyzabs234");
         $this->assertNull($url, "master api url invalid");
 
