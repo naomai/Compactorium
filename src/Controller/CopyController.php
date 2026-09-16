@@ -17,8 +17,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('api/copy', name: 'copy_')]
 class CopyController extends AbstractController {
 
-    public function __construct(private EntityManagerInterface $entityManager)
-    {
+    public function __construct(private EntityManagerInterface $entityManager) {
+
     }
 
     #[Route('/{id}', name: "get", methods: ['GET', 'HEAD'])]
@@ -51,7 +51,16 @@ class CopyController extends AbstractController {
             $copy->album = $album;
         }
 
+        if($modified->has('discogsUrl')) {
+            $resolver = new AlbumResolver($em);
+            $album = $resolver->resolveAlbumFromUrl(
+                $modified->getString('discogsUrl')
+            );
+            $copy->album = $album;
+        }
+
         $em->persist($copy);
+        $em->flush();
         
         return $this->json(
             LibraryCopyView::fromCopy($copy)

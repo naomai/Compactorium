@@ -6,6 +6,8 @@ use Naomai\Compactorium\Entity\Album;
 use Naomai\Compactorium\Entity\Library;
 use Naomai\Compactorium\Entity\Scan;
 use Naomai\Compactorium\Request;
+use Naomai\Compactorium\Services\AlbumCopyService;
+use Naomai\Compactorium\Services\AlbumResolver;
 use Naomai\Compactorium\Views\LibraryCopyView;
 use Naomai\Compactorium\Views\ScanView;
 
@@ -66,6 +68,7 @@ try {
             $request = Request::get();
             $libraryId = $request->int("library", 0);
             $library = $em->find(Library::class, $libraryId);
+            $filter = $request->text("type", "all");
 
             if($library->ownerId !== $userId) {
                 throw new Exception("Unauthorized.");
@@ -75,6 +78,13 @@ try {
                 ['library'=>$library],
                 ['id'=>'DESC']
             );
+
+            if($filter=="unresolved") {
+                $scans = array_values(array_filter(
+                    $scans,
+                    fn($scan) => $scan->copy === null || $scan->copy->album === null
+                ));
+            }
 
             $response = [
                 'infoDownloaded' => false,
@@ -117,6 +127,20 @@ try {
                         $em->persist($scan->copy);
                     }
 
+                } 
+
+            } else {
+                if($request->text('discogsUrl', "") !== "") {
+                    $library = $scan->library;
+
+                    $resolver = new AlbumResolver($em);
+                    $album = $resolver->resolveAlbumFromUrl(
+                        $request->text('discogsUrl')
+                    );
+
+                    $copy = AlbumCopyService::buildForAlbum($album, $library, null);
+                    $copy->scan = $scan;
+                    $em->persist($copy);
                 }
             }
             
