@@ -54,7 +54,9 @@ try {
                 'infoDownloaded' => false,
 				'barcodes' => array_map(
                     fn($scan)=>ScanView::fromScan($scan), 
-                    $scans
+                    array_values(array_filter($scans, fn($scan)=>
+                        $scan->copy === null || $scan->copy->album === null
+                    ))
                 )
             ];
             $httpCode = 201;

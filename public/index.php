@@ -1,8 +1,10 @@
 <?php
     namespace Naomai\Compactorium;
 
+    use Naomai\Compactorium\Entity\Copy;
     use Naomai\Compactorium\Entity\Library;
     use Naomai\Compactorium\Entity\Scan;
+    use Naomai\Compactorium\Views\LibraryCopyView;
     use Naomai\Compactorium\Views\ScanView;
 
     require __DIR__ . '/../bootstrap/app.php';
@@ -12,14 +14,32 @@
     $libraryId = 0;
     $library = $em->find(Library::class, $libraryId);
 
+    $copies = array_values(array_filter(
+        $em->getRepository(Copy::class)->findBy(
+            ['library'=>$library],
+            ['id'=>'DESC']
+        ),
+        fn($copy) => $copy->album !== null
+    ));
+
+    $libraryContents = array_map(
+        fn($copy)=>LibraryCopyView::fromCopy($copy), 
+        $copies
+    );
+
+
     $scans = $em->getRepository(Scan::class)->findBy(
         ['library'=>$library],
         ['id'=>'DESC']
     );
 
-    $barcodes = array_map(
+
+
+    $unresolvedBarcodes = array_map(
         fn($scan)=>ScanView::fromScan($scan), 
-        $scans
+        array_values(array_filter($scans, fn($scan)=>
+            $scan->copy === null || $scan->copy->album === null
+        ))
     );
 
 ?>
@@ -70,7 +90,7 @@
                     }
                     lastBcd = bcd;
                     bcdScanned(bcd);
-                    $("#dbg").text(`code:${bcd} len:${store.barcodes.length}`);
+                    $("#dbg").text(`code:${bcd}`);
                 }
             });
         }
@@ -114,7 +134,7 @@
 		   const scanInfo=await resp.json();
 		   let status=scanInfo.hasOwnProperty('barcodes');
 		   $("#dbg").text(`status:${status?'OK ':scanInfo.error}`);
-		   store.barcodes=scanInfo.barcodes;
+		   store.unresolved=scanInfo.barcodes;
 		   reloadView();
         }
 
@@ -133,8 +153,8 @@
                 })
             });
 
-            store.library = [];
-            store.unresolved = [];
+            //store.library = [];
+            //store.unresolved = [];
 		    const scanInfo=await resp.json();
 		    let status=scanInfo.hasOwnProperty('barcode');
 		    scan.copy=scanInfo.copy;
@@ -148,10 +168,10 @@
 
 
         function reloadView() {
-            const resolvedCheck=(scan) => scan.copy!==null && scan.copy.albumTitle!==null;
+            /*const resolvedCheck=(scan) => scan.copy!==null && scan.copy.albumTitle!==null;
 
             store.library = store.barcodes.filter((scan)=>resolvedCheck(scan));
-            store.unresolved = store.barcodes.filter((scan)=>!resolvedCheck(scan));
+            store.unresolved = store.barcodes.filter((scan)=>!resolvedCheck(scan));*/
 
         }
 
@@ -295,9 +315,8 @@
         import { reactive, createApp } from 'https://esm.sh/pocket-vue'
 
         store = reactive({
-            barcodes: <?=json_encode($barcodes)?>,
-            library: [],
-            unresolved: [],
+            library: <?=json_encode($libraryContents)?>,
+            unresolved: <?=json_encode($unresolvedBarcodes)?>,
 
         });
 
@@ -329,7 +348,7 @@
         <div class="panel">
             <h2 class='panelTitle'>Collection</h2>
             <div id="list" v-scope>
-                <div v-for="scan in store.library"  v-scope="ListViewCopy(scan.copy)" class="album albumCopy">
+                <div v-for="copy in store.library"  v-scope="ListViewCopy(copy)" class="album albumCopy">
                 </div>
             </div>
         </div>
