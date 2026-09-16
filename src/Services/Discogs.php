@@ -25,6 +25,12 @@ class Discogs {
         self::SetHttpClient($client);
     }
 
+    /**
+     * Searches Discogs for releases matching a barcode.
+     *
+     * @param string $bcd Barcode to search for.
+     * @return array<int, object>|null Matching Discogs Release/Master objects, or null if no matches are found.
+     */
     public static function SearchBarcode(string $bcd) : ?array {
         $urlArgs = [
             'barcode'=>"{$bcd}",
@@ -76,9 +82,23 @@ class Discogs {
 
     }
 
+    /**
+     * Fetches and validates a Discogs release from a frontend or API URL.
+     *
+     * @param string $url Discogs master/release URL.
+     * @return object Discogs API Master/Release object.
+     *
+     * @throws InvalidArgumentException If the URL is not a valid Discogs URL.
+     */
     public static function GetReleaseFromUrl(string $url) : object {
         Logger::debug("Discogs", "GetReleaseFromUrl: {$url}");
-        $master = self::$client->getJson($url);
+        $apiUrl = Discogs::resolveApiUrlFromUrl($url);
+
+        if($apiUrl === null) {
+            throw new InvalidArgumentException("Provided Discogs URL is invalid");
+        }
+
+        $master = self::$client->getJson($apiUrl);
 
         return self::ValidateRelease($master);
     }
@@ -90,11 +110,22 @@ class Discogs {
 
         return $release;        
     }
-
+    
+    /**
+     * Sets the HTTP client used by the Discogs class.
+     *
+     * @param HttpClient $client HTTP client to use for requests.
+     */
     public static function SetHttpClient(HttpClient $client) : void {
         self::$client = $client;
     }
 
+    /**
+     * Gets the front cover image for a Discogs Master/Release.
+     *
+     * @param object $discogsAlbum Discogs API Master/Release object.
+     * @return string|null Local path to the cover image, or null if no cover is available.
+     */
     public static function getFrontCover(object $discogsAlbum) : ?string {
         $title = $discogsAlbum->title;
         $artist = $discogsAlbum->artists[0]->name;
@@ -115,6 +146,12 @@ class Discogs {
         
     }
 
+    /**
+     * Resolves a Discogs API URL from frontent/API URL.
+     *
+     * @param string $url Discogs frontend/API URL.
+     * @return string|null Resolved API URL, or null if the URL is invalid.
+     */
     public static function resolveApiUrlFromUrl(string $url) : ?string {
         $parsed = parse_url($url);
 
