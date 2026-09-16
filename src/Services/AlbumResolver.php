@@ -4,6 +4,7 @@ namespace Naomai\Compactorium\Services;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use InvalidArgumentException;
 use Naomai\Compactorium\Logger;
 use Naomai\Compactorium\Entity\Album;
 use Naomai\Compactorium\Entity\Barcode;
@@ -82,24 +83,47 @@ class AlbumResolver {
             }
         } else {
             foreach($albDiscogs as $master) {
-                $title = $master->title;
-                $artist = $master->artists[0]->name;
-                $mbData = MusicBrainz::SearchAlbum("artistname:\"{$artist}\" release:\"{$title}\" barcode:{$bcd}");
-                $alb = (object) [
-                    'artist'=>$artist,
-                    'title'=>$title,
-                    'year'=>$master->year,
-                    'barcode'=>$bcd,
-                    'rawJson'=>(object)[
-                        'discogs'=>$master,
-                        'mb'=>$mbData?->rawJson->mb
-                    ]
-                ];
+                $alb = self::rawJsonFromDiscogsMasterData($master);
+                self::rawJsonHydrateBcd($alb, $bcd);
                 $albumData = self::saveAlbum($alb, $bcd);
                 $albums[] = $albumData;
             }
         }
         return $albums;
+    }
+
+    public function resolveAlbumFromUrl(string $url) : ?Album {
+        try{
+            $master = Discogs::getReleaseFromUrl($url);
+        }
+        catch(InvalidArgumentException $e) {
+            return null;
+        }
+
+        $alb = self::rawJsonFromDiscogsMasterData($master);
+        $albumData = self::saveAlbum($alb);
+        return $albumData;
+    }
+
+    private static function rawJsonFromDiscogsMasterData(object $master) : object {
+        $title = $master->title;
+        $artist = $master->artists[0]->name;
+        $mbData = MusicBrainz::SearchAlbum("artistname:\"{$artist}\" release:\"{$title}\"");
+        $alb = (object) [
+            'artist'=>$artist,
+            'title'=>$title,
+            'year'=>$master->year,
+            'rawJson'=>(object)[
+                'discogs'=>$master,
+                'mb'=>$mbData?->rawJson->mb
+            ]
+        ];
+
+        return $alb;
+    }
+
+    private function rawJsonHydrateBcd(object $rawJson, string $bcd) : void {
+        $rawJson->barcode = $bcd;
     }
 
     /**
@@ -122,10 +146,10 @@ class AlbumResolver {
      * Creates and stores an Album and its barcode from raw metadata.
      *
      * @param object $albumData Raw JSON metadata combined from external sources.
-     * @param string $bcd Barcode associated with the album.
+     * @param ?string $bcd Barcode associated with the album.
      * @return Album Persisted Album entity.
      */
-    private function saveAlbum(object $albumData, string $bcd) : Album {
+    private function saveAlbum(object $albumData, ?string $bcd=null) : Album {
         $em = $this->em;
 
         $slug = Slugger::slugFromArtistAndAlbum($albumData->artist, $albumData->title);
@@ -151,13 +175,23 @@ class AlbumResolver {
         );
 
         $albObj->image = $coverPathRelative;
-        $bcdObj = new Barcode();
-        $bcdObj->barcode = $albumData->barcode ?? $bcd;
-        $bcdObj->album = $albObj;
+
+        $barcodeResolved = $albumData->barcode ?? $bcd;
+        $bcdObj = null;
+
+        if($barcodeResolved!==null) {
+            $bcdObj = new Barcode();
+            $bcdObj->barcode = $albumData->barcode ?? $bcd;
+            $bcdObj->album = $albObj;
+        }
 
         try{
             $em->persist($albObj);
-            $em->persist($bcdObj);
+
+            if($bcdObj!==null){
+                $em->persist($bcdObj);
+            }
+
             $em->flush();
         } catch (UniqueConstraintViolationException $e) {
             $em->clear();

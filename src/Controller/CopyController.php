@@ -5,6 +5,9 @@ namespace Naomai\Compactorium\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Naomai\Compactorium\Entity\Album;
 use Naomai\Compactorium\Entity\Copy;
+use Naomai\Compactorium\Entity\Library;
+use Naomai\Compactorium\Services\AlbumCopyService;
+use Naomai\Compactorium\Services\AlbumResolver;
 use Naomai\Compactorium\Views\LibraryCopyView;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -55,4 +58,52 @@ class CopyController extends AbstractController {
         );
        
     }
+
+    #[Route('/', name: "create", methods: ['POST'])]
+    public function create(Request $request): Response {
+        $em = $this->entityManager;
+        $resolver = new AlbumResolver($em);
+
+        $criteria = $request->getPayload();
+
+        if(!$criteria->has('library')) {
+            return $this->json(["error" => "Invalid library ID"], 400);
+        }
+                
+        $libraryId = $criteria->getInt('library');
+        $library = $em->find(Library::class, $libraryId);
+
+        if($library===null) {
+            return $this->json(["error" => "Invalid library ID"], 400);
+        }
+
+        $copy = null;
+
+        if($criteria->has('discogsUrl')) {
+            $newAlbum = $resolver->resolveAlbumFromUrl(
+                $criteria->getString('discogsUrl')
+            );
+
+            $matchingCopies = $em
+                ->getRepository(Copy::class)
+                ->count([
+                    'album'=>$newAlbum,
+                    'library'=>$library,
+                ]);
+
+            if($matchingCopies > 0) {
+                return $this->json(["error" => "Already added."], 400);
+            }
+
+            $copy = AlbumCopyService::buildForAlbum($newAlbum, $library, null);
+
+            $em->persist($copy);
+        }
+        
+        $em->flush();
+        return $this->json(LibraryCopyView::fromCopy($copy));
+
+
+    }
+
 }
