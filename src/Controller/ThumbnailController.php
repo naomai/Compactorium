@@ -18,7 +18,7 @@ class ThumbnailController extends AbstractController {
         $size = $request->query->getInt('size', 9999);
 
         $gen = new ThumbnailGenerator();
-        $gen->setSizeConstraints([200, 640, 1280, 9999]);
+        $gen->setSizeConstraints([50, 200, 400, 800, 1280, 9999]);
 
         $statusCode = 200;
 

@@ -68,6 +68,8 @@
         localStorage.setItem(configKey, JSON.stringify(config));
     }
 
+    var dpiAdjust = Math.ceil(window.devicePixelRatio) ?? 1.0;
+
 
     let lastBcd = null;
     const hints = new Map();
@@ -637,7 +639,7 @@
         <div class="scanBcd">{{scan.barcode}}</div>
         <div class="disambigCovers">
             <div v-for="album in scan.copy.disambiguation.albums.slice(0, 4)" class="disambigPreview">
-                <img :src="`api/thumbnail/front/${album.slug}.webp?size=80`" :alt="`[${album.artist} - ${album.title}]`" class='cover' />
+                <img :src="`api/thumbnail/front/${album.slug}.webp?size=${50*dpiAdjust}`" :alt="`[${album.artist} - ${album.title}]`" class='cover' />
             </div>
             <div v-if="scan.copy.disambiguation.albums.length > 4" class="disambigPreview moreCounter"> +{{scan.copy.disambiguation.albums.length-4}}</div>
         </div>
@@ -645,7 +647,7 @@
 
     <template id="tplAlbumCopy">
 
-        <img :src="`api/thumbnail/front/${album.slug}.webp?size=640`" alt="front cover" class="cover" />
+        <img :src="`api/thumbnail/front/${album.slug}.webp?size=${200*dpiAdjust}`" alt="front cover" class="cover" />
         <div class='albumDetails'>
             <div class='albumTitle'>{{album.title}}</div>
             <div class='albumArtist'>{{formatArtistName(album.artist)}} [{{album.year}}]</div>
