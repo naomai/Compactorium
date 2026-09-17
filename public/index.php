@@ -558,7 +558,9 @@
             <div id="groupedList" v-scope>
                 <div v-for="group in store.libraryView" class="copyGroup">
                     <h3 v-if="group.key !== '#'">{{group.key}}</h3>
-                    <div v-for="copy in group.items"  v-scope="ListViewCopy(copy)" class="album albumCopy"></div>
+                    <div class="copyGroupAlbumList">
+                        <div v-for="copy in group.items"  v-scope="ListViewCopy(copy)" class="album albumCopy"></div>
+                    </div>
                 </div>
             </div>
         </div>

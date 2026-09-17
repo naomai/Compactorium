@@ -77,7 +77,8 @@
 		h2.panelTitle{
 			outline: 1px solid #666;
 			color: #7a48b8;
-			margin: 0 0 2px 0;
+			/* margin: 0 0 2px 0; */
+			margin: 0;
 			text-align: center;
 			text-transform: uppercase;
 
@@ -142,14 +143,27 @@
 	}
 
 	.copyGroup {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		/*justify-content: center;*/
-		align-items: stretch;
+
+		margin-bottom: 6mm;
 
 		&>h3 {
 			flex: 0 0 100%;
+			padding: 2mm 3mm;
+			text-transform: uppercase;
+			box-sizing: border-box;
+			color: #999;
+			font-size: 15pt;
+
+			border-top: 1px dashed #666;
+			margin: 0 0 3mm 0;
+		}
+
+		.copyGroupAlbumList {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			/*justify-content: center;*/
+			align-items: stretch;
 		}
 
 		.albumCopy {
@@ -319,7 +333,7 @@
 			}
 		}
 
-		.copyGroup {
+		.copyGroup .copyGroupAlbumList {
 			display: grid;
 			grid-template-columns: 1fr 1fr;
 
