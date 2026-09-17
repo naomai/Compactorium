@@ -10,6 +10,7 @@ class LibraryCopyView {
     public ?string $artist;
     public ?string $year;
     public ?string $image;
+    public ?string $slug;
     public string $created_at;
     public ?AlbumDisambigView $disambiguation;
 
@@ -28,6 +29,7 @@ class LibraryCopyView {
         $view->artist = $album?->artist;
         $view->year = $album?->year;
         $view->image = $album?->image;
+        $view->slug = $album?->slug;
         $view->created_at = $copy->createdAt->format(\DateTimeInterface::ATOM);
 
         if($copy->scan !== null) {
