@@ -139,7 +139,7 @@
         }
 
         async function sendBcd(bcd) {
-            const resp=await fetch("api/scan.php", {
+            const resp=await fetch("api/scan/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -160,7 +160,7 @@
                 scan: scan.id
             });
 
-            const resp=await fetch("api/scan.php?"+query.toString() , {
+            const resp=await fetch(`api/scan/${scan.id}` , {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json"
@@ -194,7 +194,7 @@
 
                 if(editor.targetScan !== null) {
                     const scanId = editor.targetScan.id
-                    const resp=await fetch("api/scan.php?scan=" + scanId , {
+                    const resp=await fetch(`api/scan/${scanId}` , {
                         method: "PATCH",
                         headers: {
                             "Content-Type": "application/json"
@@ -259,7 +259,7 @@
         function fullReload() {
             store.unresolved = [];
             store.library = [];
-            fetch("api/scan.php?type=unresolved&library=" + store.libraryId, 
+            fetch(`api/scan/?type=unresolved&library=${store.libraryId}`, 
                 {
                     method: "GET",
                 })
