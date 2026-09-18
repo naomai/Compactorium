@@ -270,7 +270,7 @@
                 }
             );
 
-            fetch("api/library.php?library=" + store.libraryId, 
+            fetch("api/library/" + store.libraryId, 
                 {
                     method: "GET",
                 })
