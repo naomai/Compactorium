@@ -253,7 +253,15 @@
 
         function reloadView() {
             const viewId = getConfig("libraryViewId", "artist");
-            store.libraryView = applyView(store.library, sortViews[viewId]);
+            const showGroupSeparators = getConfig("libraryViewShowGroupSeparators", true);
+
+            let library = applyView(store.library, sortViews[viewId]);
+
+            if(!showGroupSeparators) {
+                library = [{key: "#", items: library.flatMap(grp=>grp.items)}];
+            }
+
+            store.libraryView = library;
         }
 
         function fullReload() {
@@ -567,7 +575,7 @@
             </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" v-scope v-if="store.unresolved.length > 0">
             <h2 class='panelTitle'>Unmarked graves</h2>
             <p class='panelDescription'>Barcodes that match multiple albums. Help them rest in peace.</p>
             <div id="unresolved" v-scope>
