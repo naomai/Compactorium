@@ -387,9 +387,12 @@
 		width: 120px;
 	}
 
+	.ancient header table {
+		border: none;
+	}
 	.ancient #logotype, .ancient #headerdeco {
-		display: -moz-inline-box;
-		display: inline-block;
+		/*display: -moz-inline-box;
+		display: inline-block;*/
 	}
 
 	.ancient footer {

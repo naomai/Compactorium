@@ -54,12 +54,14 @@
 </head>
 <body class="ancient">
     <header>
-        <div id="logotype"><img 
-            src="assets/img/logotype_s.png" 
-            alt="Compactorium"/></div>
-        <div id="headerdeco"><img 
-            src="assets/img/barcodemonk_s.png" 
-            alt="Barcode monk"/></div>
+        <table><tr>
+            <td id="logotype"><img 
+                src="assets/img/logotype_s.png" 
+                alt="Compactorium"/></td>
+            <td id="headerdeco"><img 
+                src="assets/img/barcodemonk_s.png" 
+                alt="Barcode monk"/></td>
+        </tr></table>
     </header>
     <main>
         <div class="panel">
