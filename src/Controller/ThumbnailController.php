@@ -13,12 +13,24 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/thumbnail', name: 'thumbnail_')]
 class ThumbnailController extends AbstractController {
 
-    #[Route('/front/{slug}.webp', name: 'frontcover', methods: ['GET'])]
-    public function frontCover(string $slug, Request $request): Response {
+    #[Route(
+        '/front/{slug}.{ext}',
+        name: 'frontcover',
+        requirements: ['ext' => 'webp|jpg'],
+        methods: ['GET']
+    )]
+    public function frontCover(string $slug, string $ext, Request $request): Response {
         $size = $request->query->getInt('size', 9999);
 
         $gen = new ThumbnailGenerator();
         $gen->setSizeConstraints([50, 200, 400, 800, 1280, 9999]);
+
+        $imageFinishFunctions = [
+            'jpg'=>imagejpeg(...),
+            'webp'=>imagewebp(...),
+        ];
+
+        $finishFunction = $imageFinishFunctions[$ext];
 
         $statusCode = 200;
 
@@ -48,7 +60,7 @@ class ThumbnailController extends AbstractController {
         imagepalettetotruecolor($imageResized);
         
         ob_start();
-        imagewebp($imageResized, null, 85);
+        $finishFunction($imageResized, null, 85);
         $data = ob_get_clean();
 
         $response->setStatusCode($statusCode);
