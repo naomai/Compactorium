@@ -48,6 +48,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--[if lte IE 7]>
+    <meta http-equiv="refresh" content="0;url=./ancient.php" />
+    <![endif]-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <link rel="stylesheet" href="assets/common.css">
