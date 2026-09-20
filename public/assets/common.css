@@ -361,3 +361,37 @@
 			max-height: none !important;
 		}
 	}
+
+	.ancient {
+		width: 800px;
+	}
+
+	.ancient .panel h2.panelTitle{
+		outline: 1px solid #666;
+		color: #7a48b8;
+		margin: 0;
+		text-align: center;
+		text-transform: uppercase;
+	}
+
+	.ancient #collectionTable, .ancient #collectionTable tr {
+		border: 1px dashed #666;
+	}
+
+	.ancient .album.albumCopy {
+
+		height: 130px;
+	}
+
+	.ancient .cover {
+		width: 120px;
+	}
+
+	.ancient #logotype, .ancient #headerdeco {
+		display: -moz-inline-box;
+		display: inline-block;
+	}
+
+	.ancient footer {
+		font-style: italic;
+	}

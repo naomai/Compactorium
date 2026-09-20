@@ -53,6 +53,24 @@
     <link rel="stylesheet" href="assets/common.css">
     <title>Compactorium</title>
 
+    <script type="text/javascript">
+        /* Redirect STUBBORNLY UNDEAD browsers to Ancient version */
+
+        var testEl1 = document.createElement('div');
+        testEl1.style.display = 'grid';
+        var gridSupport = testEl1.style.display === 'grid';
+
+        var testEl2 = document.createElement("input");
+        testEl2.setAttribute("type", "color");
+        var html5Support = testEl2.type !== "text";
+
+        if(!html5Support || !gridSupport){
+            window.location = "./ancient.php";
+
+        }
+
+    </script>
+
 <script>
     /* LOCAL CONFIG */
     const configKey = 'compactorium-config';
