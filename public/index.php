@@ -74,34 +74,34 @@
 
     </script>
 
-<script>
-    /* LOCAL CONFIG */
-    const configKey = 'compactorium-config';
+    <script>
+        /* LOCAL CONFIG */
+        const configKey = 'compactorium-config';
 
-    function getConfig(key, defaultValue = null) {
-        const config = JSON.parse(localStorage.getItem(configKey) ?? '{}');
-        return config[key] ?? defaultValue;
-    }
+        function getConfig(key, defaultValue = null) {
+            const config = JSON.parse(localStorage.getItem(configKey) ?? '{}');
+            return config[key] ?? defaultValue;
+        }
 
-    function setConfig(key, value) {
-        const config = JSON.parse(localStorage.getItem(configKey) ?? '{}');
-        config[key] = value;
-        localStorage.setItem(configKey, JSON.stringify(config));
-    }
+        function setConfig(key, value) {
+            const config = JSON.parse(localStorage.getItem(configKey) ?? '{}');
+            config[key] = value;
+            localStorage.setItem(configKey, JSON.stringify(config));
+        }
 
-    var dpiAdjust = Math.ceil(window.devicePixelRatio) ?? 1.0;
+        var dpiAdjust = Math.ceil(window.devicePixelRatio) ?? 1.0;
 
 
-    let lastBcd = null;
-    const hints = new Map();
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-        ZXing.BarcodeFormat.EAN_13,
-        ZXing.BarcodeFormat.EAN_8
-    ]);
+        let lastBcd = null;
+        const hints = new Map();
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+            ZXing.BarcodeFormat.EAN_13,
+            ZXing.BarcodeFormat.EAN_8
+        ]);
 
-    const codeReader = new ZXing.BrowserMultiFormatReader(hints);
+        const codeReader = new ZXing.BrowserMultiFormatReader(hints);
 
-    var scannerControls;
+        var scannerControls;
             
         async function initScanner() {
             $("#dbg").text(`ready`);
