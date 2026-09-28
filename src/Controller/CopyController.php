@@ -93,6 +93,10 @@ class CopyController extends AbstractController {
                 $criteria->getString('discogsUrl')
             );
 
+            if($newAlbum === null) {
+                return $this->json(["error" => "Cannot resolve album from URL."], 400);
+            }
+
             $matchingCopies = $em
                 ->getRepository(Copy::class)
                 ->count([

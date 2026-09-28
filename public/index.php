@@ -206,6 +206,8 @@
         async function manualAddSubmit(manualAddContext) {
             const editor = editors.manualAdd;
 
+            editor.error = null;
+
             if(manualAddContext.url != "") {
                 const request = {
                     discogsUrl: manualAddContext.url,
@@ -274,7 +276,7 @@
 
         function reloadView() {
             const viewId = getConfig("libraryViewId", "artist");
-            const showGroupSeparators = getConfig("libraryViewShowGroupSeparators", true);
+            const showGroupSeparators = getConfig("libraryViewShowGroupSeparators", false);
 
             let library = applyView(store.library, sortViews[viewId]);
 
@@ -358,6 +360,13 @@
             $("#disambigUi").on("close", (e)=>{
                 editors.disambig.scan = null;
                 editors.disambig.albumSelection = null;
+            }); 
+
+            $(document).on("click", "#mobileSidebarOpenBtn", e=>{
+                $("#actualMenu").addClass("open");
+            });
+            $(document).on("click", "#mobileSidebarCloseBtn", e=>{
+                $("#actualMenu").removeClass("open");
             });
         });
 
@@ -581,11 +590,23 @@
             sizes="(width <= 800px) 190px, 273px"
             alt="Barcode monk"/></div>
     </header>
+    <nav id="mobileActionPanel">
+        <button id='mobileSidebarOpenBtn'>Menu</button>
+    </nav>
+    <nav id="actualMenu">
+        <div class="sidebar panel">
+            <h2 class='panelTitle'>Menu</h2>
+            <button id='mobileSidebarCloseBtn'>⨉</button>
+
+        </div>
+    </nav>
     <main>
-        <button id='scannerOpenBtn'>Open scanner</button>
-        <button id='manualAddOpenBtn'>+ Manual add</button>
-        <div class="panel">
+        <div class="content panel">
             <h2 class='panelTitle'>Collection</h2>
+            <div class="panelActionBar">
+                <button id='scannerOpenBtn' class='iconBtn'><img src="assets/img/action_addbcd.png" alt="Open scanner"/></button>
+                <button id='manualAddOpenBtn' class='iconBtn'><img src="assets/img/action_addlink.png" alt="Manual add"/></button>
+            </div>
             <div id="groupedList" v-scope>
                 <div v-for="group in store.libraryView" class="copyGroup">
                     <h3 v-if="group.key !== '#'">{{group.key}}</h3>
@@ -634,10 +655,10 @@
                 Selected scan with no matches...
                 <div v-scope="UnresolvedScanView(editor.targetScan)" class="unresolvedScan"></div>
             </div>
-            <label for="manualAddUrl">Discogs URL</label> <input type="url" name="manualAddUrl" v-model="editor.url"/>
+            <label for="manualAddUrl">Discogs URL</label> <input type="url" name="manualAddUrl" id="manualAddUrlInput" autofocus v-model="editor.url"/>
         </div>
 
-        <div id="manualAddError" v-model="editor.error"></div>
+        <div id="manualAddError">{{editor.error}}</div>
         <div class="dialogActionBar">
             <button :disabled="editor.url==''" @click="manualAddSubmit(editor)">OK</button>
         </div>

@@ -54,9 +54,24 @@
 
 	}
 
+	input:invalid {
+		border-color: red;
+	}
+
+	body {
+		display: grid;
+		grid-template-columns: 180px 1fr;
+		grid-template-rows: auto;
+		grid-template-areas: 
+			"header header"
+			"nav main";
+		gap: 6px;
+	}
+
 	header {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
+        grid-area: header;
 
 		#headerdeco {
 			text-align: right;
@@ -64,6 +79,23 @@
 
 	}
 
+	main {
+        grid-area: main;
+		color: #888;
+
+	}
+
+	nav {
+        grid-area: nav;
+
+		&#mobileActionPanel {
+			display: none;
+		}
+
+		#mobileSidebarCloseBtn {
+			display: none;
+		}
+	}
 
 
 	.panel {
@@ -140,6 +172,10 @@
 			box-shadow: inset 1px 1px 0px #808080, -1px 0px 0px #000000, 1px 0px 0px #000000, 0px -1px 0px #000000, 0px 1px 0px #000000;
 		}
 
+		&.iconBtn{
+			padding: 4px 4px;
+		}
+
 	}
 
 	.copyGroup {
@@ -168,7 +204,7 @@
 
 		.albumCopy {
 			display: inline-block;
-			width: 200px;
+			width: 170px;
 			padding: 10px;
 
 			.cover {
@@ -252,6 +288,11 @@
 		&::backdrop {
 			overflow: hidden;
 			overscroll-behavior: none;
+		}
+
+		.dialogHeader h2 {
+			margin: 0;
+			height: 32px;
 		}
 
 		.dialogMain {
@@ -341,16 +382,43 @@
 				width: unset;
 			}
 		}
+		body{
+			display: block;
+			nav {
+				&#actualMenu {
+					display: none;
+				}
+
+				&#actualMenu.open {
+					display: block;
+					position: fixed;
+					inset: 0;
+					width: auto;
+					height: 100dvh;
+					z-index: 1000;
+					overflow-y: auto;
+					background: #000d0c;
+				}
+
+				&#mobileActionPanel, #mobileSidebarCloseBtn {
+					display: block;
+				}
+			}
+		}
 	}
 
 	@media (hover: none) and (pointer: coarse) {
-		button:not(.dialogCtl) {
+		button:not(.dialogCtl, .iconBtn) {
 			padding: 8px 10px;
 			min-height: 40px;
 			min-width: 70px;
 
 			font-size: 150%;
 
+		}
+
+		button.iconBtn{
+			padding: 6px 6px;
 		}
 	}
 
