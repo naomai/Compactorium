@@ -17,7 +17,6 @@ $em = $kernel
     ->getContainer()
     ->get('doctrine')
     ->getManager();
-Database::init($em);
 Services\CoverArtStore::init();
 Services\Discogs::init();
 Services\MusicBrainz::init();
