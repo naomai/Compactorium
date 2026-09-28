@@ -1,0 +1,31 @@
+security:
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    password_hashers:
+        Naomai\Compactorium\Entity\User: 'auto'
+
+    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    providers:
+        app_user_provider:
+            entity:
+                class: Naomai\Compactorium\Entity\User
+                property: email
+
+    firewalls:
+        main:
+            lazy: true
+            provider: app_user_provider
+
+            json_login:
+                check_path: /api/login
+                username_path: email
+                password_path: password
+
+            logout:
+                path: /api/logout
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/login,    roles: PUBLIC_ACCESS }
+        - { path: ^/api/,         roles: IS_AUTHENTICATED_FULLY }

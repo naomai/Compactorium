@@ -22,9 +22,9 @@ class Scan {
     #[ORM\Column(type: 'integer')]
     public int $id;
 
-    // Temporary until User entity exists.
-    #[ORM\Column(name: 'owner_id', type: 'integer')]
-    public int $ownerId = 0;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'owner_id', referencedColumnName: 'id', nullable: false)]
+    public User $owner;
 
     #[ORM\ManyToOne(
         targetEntity: Library::class,

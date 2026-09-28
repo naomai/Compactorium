@@ -23,8 +23,9 @@ class Copy {
     )]
     public Library $library;
 
-    #[ORM\Column(name: 'owner_id', type: 'integer')]
-    public int $ownerId = 0;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'owner_id', referencedColumnName: 'id', nullable: false)]
+    public User $owner;
 
     #[ORM\OneToOne(
         targetEntity: Scan::class,

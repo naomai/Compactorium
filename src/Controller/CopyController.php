@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Naomai\Compactorium\Entity\Album;
 use Naomai\Compactorium\Entity\Copy;
 use Naomai\Compactorium\Entity\Library;
+use Naomai\Compactorium\Entity\User;
 use Naomai\Compactorium\Services\AlbumCopyService;
 use Naomai\Compactorium\Services\AlbumResolver;
 use Naomai\Compactorium\Views\LibraryCopyView;
@@ -39,6 +40,14 @@ class CopyController extends AbstractController {
         if (!$copy) {
             return $this->json(["error" => "Copy was not found" . $id], 404);
         }
+
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        if ($copy->owner !== $currentUser) {
+            return $this->json(["error" => "Unauthorized."], 401);
+        }
+
         $modified = $request->getPayload();
 
         if($modified->has('albumSlug')) {
@@ -86,6 +95,9 @@ class CopyController extends AbstractController {
             return $this->json(["error" => "Invalid library ID"], 400);
         }
 
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         $copy = null;
 
         if($criteria->has('discogsUrl')) {
@@ -108,7 +120,7 @@ class CopyController extends AbstractController {
                 return $this->json(["error" => "Already added."], 400);
             }
 
-            $copy = AlbumCopyService::buildForAlbum($newAlbum, $library, null);
+            $copy = AlbumCopyService::buildForAlbum($newAlbum, $library, $currentUser);
 
             $em->persist($copy);
         }

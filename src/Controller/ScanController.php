@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Naomai\Compactorium\Entity\Album;
 use Naomai\Compactorium\Entity\Library;
 use Naomai\Compactorium\Entity\Scan;
+use Naomai\Compactorium\Entity\User;
 use Naomai\Compactorium\Services\AlbumCopyService;
 use Naomai\Compactorium\Services\AlbumResolver;
 use Naomai\Compactorium\Views\LibraryCopyView;
@@ -36,8 +37,10 @@ class ScanController extends AbstractController {
             return $this->json(["error" => "Invalid library ID"], 400);
         }
 
-        // TODO AUTH
-        if($library->ownerId !== 0) {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        if($library->owner !== $currentUser) {
             return $this->json(["error" => "Unauthorized."], 401);
         }
 
@@ -46,7 +49,7 @@ class ScanController extends AbstractController {
         }
 
         $scan = new Scan();
-        $scan->ownerId = 0;
+        $scan->owner = $currentUser;
         $scan->library = $library;
         $scan->barcode = $bcd;
         $scan->scannedAt = new \DateTimeImmutable();
@@ -86,8 +89,10 @@ class ScanController extends AbstractController {
             return $this->json(["error" => "Invalid library ID"], 400);
         }
 
-        // TODO AUTH
-        if($library->ownerId !== 0) {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        if($library->owner !== $currentUser) {
             return $this->json(["error" => "Unauthorized."], 401);
         }
 
@@ -124,8 +129,10 @@ class ScanController extends AbstractController {
             return $this->json(["error" => "Scan was not found"], 404);
         }
 
-        // TODO AUTH
-        if($scan->ownerId !== 0) {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        if($scan->owner !== $currentUser) {
             return $this->json(["error" => "Unauthorized."], 401);
         }
 
@@ -166,7 +173,7 @@ class ScanController extends AbstractController {
                     return $this->json(["error" => "Could not resolve album from URL"], 400);
                 }
 
-                $copy = AlbumCopyService::buildForAlbum($album, $library, null);
+                $copy = AlbumCopyService::buildForAlbum($album, $library, $currentUser);
                 $copy->scan = $scan;
                 $em->persist($copy);
             }
