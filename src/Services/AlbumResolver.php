@@ -152,8 +152,8 @@ class AlbumResolver {
     private function saveAlbum(object $albumData, ?string $bcd=null) : Album {
         $em = $this->em;
 
-        $slug = Slugger::slugFromArtistAndAlbum($albumData->artist, $albumData->title);
-        $albObj = $em->find(Album::class, $slug);
+        $albObj = $em->getRepository(Album::class)
+            ->findOneByArtistAndTitle($albumData->artist, $albumData->title);
         if($albObj !== null) {
             Logger::debug("AlbumResolver", "found album (already saved) {$albumData->artist} - {$albumData->title}");
         } else {
@@ -161,7 +161,7 @@ class AlbumResolver {
 
             $albObj->artist = $albumData->artist;
             $albObj->title = $albumData->title;
-            $albObj->slug = $slug;
+            $albObj->slug = Slugger::slugFromArtistAndAlbum($albumData->artist, $albumData->title);
 
             $albObj->year = $albumData->year;
             $albObj->rawJson = $albumData->rawJson;

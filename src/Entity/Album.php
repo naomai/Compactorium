@@ -5,10 +5,9 @@ use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Naomai\Compactorium\Database;
-use Naomai\Compactorium\Slugger;
+use Naomai\Compactorium\Repository\AlbumRepository;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: AlbumRepository::class)]
 #[ORM\Table(name: 'albums')]
 class Album {
     #[ORM\Id]
@@ -57,17 +56,4 @@ class Album {
         preg_match('/^(\d{4})/', $mbDate, $m);
         return (int)$m[1] ?? null;
     }
-
-    public static function fromArtistAndTitle(string $artist, string $title): ?self {
-        $slug = Slugger::slugFromArtistAndAlbum($artist, $title);
-
-        $album = Database::entityManager()
-            ->getRepository(self::class)
-            ->find($slug);
-
-        return $album;
-    }
-
-
-
 }
