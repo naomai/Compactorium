@@ -13,8 +13,8 @@
         private static AlbumResolver $resolver;
 
 
-        public static function init() : void {
-            self::$em = Database::entityManager();
+        public static function init(EntityManagerInterface $em) : void {
+            self::$em = $em;
             self::$resolver = new AlbumResolver(self::$em);
         }
 

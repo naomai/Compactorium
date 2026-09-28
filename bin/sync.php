@@ -3,5 +3,10 @@
 
     require __DIR__ . '/../bootstrap/app.php';
 
-    ReleaseSyncWorker::init();
+    $em = $kernel
+        ->getContainer()
+        ->get('doctrine')
+        ->getManager();
+
+    ReleaseSyncWorker::init($em);
     ReleaseSyncWorker::syncPendingBarcodes();

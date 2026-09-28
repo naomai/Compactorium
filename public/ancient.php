@@ -9,7 +9,10 @@
 
     require __DIR__ . '/../bootstrap/app.php';
 
-    $em = Database::entityManager();
+    $em = $kernel
+        ->getContainer()
+        ->get('doctrine')
+        ->getManager();
 
     $libraryId = 0;
     $library = $em->find(Library::class, $libraryId);

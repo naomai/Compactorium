@@ -1,2 +1,0 @@
-ALTER TABLE `copies` 
-ALTER COLUMN scan_id DROP NOT NULL

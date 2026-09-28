@@ -1,2 +1,0 @@
-ALTER TABLE `copies` 
-ALTER COLUMN release_mbid DROP NOT NULL

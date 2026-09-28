@@ -32,6 +32,19 @@ Install dependencies. Assuming you have `composer` [command available](https://g
 composer install
 ```
 
+Apply the database migrations:
+```bash
+php bin/console doctrine:migrations:migrate
+```
+### Updating
+After pulling a new version, update the dependencies and apply any new
+database migrations:
+```bash
+composer install
+php bin/console doctrine:migrations:migrate
+```
+
+
 Point your web server to `public` directory.
 
 ### Scan
