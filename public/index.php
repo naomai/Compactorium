@@ -6,8 +6,33 @@
     use Naomai\Compactorium\Entity\Scan;
     use Naomai\Compactorium\Views\LibraryCopyView;
     use Naomai\Compactorium\Views\ScanView;
+use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 
     require __DIR__ . '/../bootstrap/app.php';
+
+    $userInfo = ['userid' => null, 'username' => null, 'lastLogin' => null];
+    
+    // Session must be available so json_login's cookie is readable on reload.
+    $httpRequest = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    try {
+        $httpRequest->getSession();
+
+
+
+        $tokenStorage = $kernel->getContainer()->get('security.token_storage');
+        $token = $tokenStorage->getToken();
+        if ($token !== null) {
+            $user = $token->getUser();
+            if ($user instanceof \Naomai\Compactorium\Entity\User) {
+                $userInfo = [
+                    'userid'   => $user->id,
+                    'username' => $user->username,
+                    'lastLogin' => $user->lastLoginAt?->format(\DateTimeInterface::ATOM),
+                ];
+            }
+        }
+    } catch (SessionNotFoundException) {
+    }
 
     $em = $kernel
         ->getContainer()
@@ -371,6 +396,8 @@
             $(document).on("click", "#mobileSidebarCloseBtn", e=>{
                 $("#actualMenu").removeClass("open");
             });
+
+            $("#signinForm").on("submit", signin);
         });
 
         function showDisambigAction(scan) {
@@ -553,6 +580,35 @@
             return EMPTY_TEMPLATE;
         }
         
+        function signin(event) {
+            event.preventDefault();
+
+            const login = $('#signinLoginTxt').val();
+            const password = $('#signinPasswordTxt').val();
+
+            if (!login || !password) {
+                $('#signinError').text('Both fields are required.');
+                return;
+            }
+
+            fetch('api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password }),
+            })
+            .then(async resp => {
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    $('#signinError').text(err.error ?? 'Login failed.');
+                    return;
+                }
+                window.location.reload();
+            })
+            .catch(() => {
+                $('#signinError').text('Network error. Please try again.');
+            });
+        }
+        
     </script>
     <script type="module">
         import { reactive, createApp } from 'https://esm.sh/pocket-vue'
@@ -561,7 +617,8 @@
             library: <?=json_encode($libraryContents)?>,
             unresolved: <?=json_encode($unresolvedBarcodes)?>,
             libraryView: [],
-            libraryId: <?=(int)$libraryId ?>
+            libraryId: <?=(int)$libraryId ?>,
+            userInfo: <?=json_encode($userInfo)?>
         });
 
         editors = reactive({
@@ -601,6 +658,22 @@
             <h2 class='panelTitle'>Menu</h2>
             <button id='mobileSidebarCloseBtn'>⨉</button>
 
+        </div>
+
+        <div class="sidebar panel">
+            <h2 class='panelTitle'>Account</h2>
+            <?php if ($userInfo['userid'] !== null): ?>
+                <p>Signed in as <strong><?=htmlspecialchars($userInfo['username'])?></strong></p>
+            <?php else: ?>
+            <form id="signinForm">
+                <label for='signinLogin'>Login (email or username)</label>
+                <input name="signinLogin" id='signinLoginTxt' type="text" />
+                <label for='signinPassword'>Password</label>
+                <input name="signinPassword" id='signinPasswordTxt' type="password" />
+                <div id="signinError"></div>
+                <input type="submit" value="Sign in" id="signInSubmit" />
+            </form>
+            <?php endif; ?>
         </div>
     </nav>
     <main>
