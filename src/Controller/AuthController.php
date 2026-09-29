@@ -81,4 +81,10 @@ class AuthController extends AbstractController
             'verified' => $user->verified,
         ]);
     }
+
+    #[Route('/login', name: 'api_login', methods: ['POST'])]
+    public function login(): void {}   // firewall intercepts
+
+    #[Route('/logout', name: 'api_logout', methods: ['POST'])]
+    public function logout(): void {}  // firewall intercepts
 }
