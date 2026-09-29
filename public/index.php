@@ -10,7 +10,14 @@ use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 
     require __DIR__ . '/../bootstrap/app.php';
 
-    $userInfo = ['userid' => null, 'username' => null, 'lastLogin' => null];
+    // First-run onboarding: redirect to the setup page while the admin's password is unset.
+    $setupNeeded = $kernel->getContainer()->get(\Naomai\Compactorium\Security\AdminSetupChecker::class)->needsSetup();
+    if ($setupNeeded) {
+        $appBaseUrl = rtrim($httpRequest->getBaseUrl(), '/');
+        header('Location: ' . $appBaseUrl . '/setup');
+        exit;
+    }
+
     
     // Session must be available so json_login's cookie is readable on reload.
     $httpRequest = \Symfony\Component\HttpFoundation\Request::createFromGlobals();

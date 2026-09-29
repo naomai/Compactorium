@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Compactorium — Set up admin account{% endblock %}
+
+{% block body %}
+<div class="content panel">
+    <h2 class="panelTitle">Welcome to Compactorium</h2>
+    <p class="panelDescription">
+        The admin account has not been configured yet. Set an email address and
+        password to finish the first-time setup.
+    </p>
+
+    {% if error is defined and error %}
+        <div class="formError">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ path('setup_submit') }}">
+        <label for="setup_email">Email</label>
+        <input type="email" name="email" id="setup_email" required autofocus />
+
+        <br/>
+
+        <label for="setup_password">Password</label>
+        <input type="password" name="password" id="setup_password" required minlength="8"
+               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*"
+               title="At least 8 characters, with an uppercase letter, a lowercase letter, and a digit"
+               autocomplete="new-password" />
+        <br/>
+
+        <label for="setup_confirm">Confirm password</label>
+        <input type="password" name="confirm_password" id="setup_confirm" required autocomplete="new-password" />
+        
+        <p class="fieldHint">At least 8 characters, including an uppercase letter, a lowercase letter, and a digit.</p>
+
+        <input type="submit" value="Set up account" />
+    </form>
+</div>
+{% endblock %}
