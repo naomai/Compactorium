@@ -6,7 +6,7 @@
     use Naomai\Compactorium\Entity\Scan;
     use Naomai\Compactorium\Views\LibraryCopyView;
     use Naomai\Compactorium\Views\ScanView;
-use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
+    use Naomai\Compactorium\Views\UserView;
 
     require __DIR__ . '/../bootstrap/app.php';
 
@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
         exit;
     }
 
+    $userInfo = null;
     
     // Session must be available so json_login's cookie is readable on reload.
     $httpRequest = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
@@ -31,11 +32,7 @@ use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
         if ($token !== null) {
             $user = $token->getUser();
             if ($user instanceof \Naomai\Compactorium\Entity\User) {
-                $userInfo = [
-                    'userid'   => $user->id,
-                    'username' => $user->username,
-                    'lastLogin' => $user->lastLoginAt?->format(\DateTimeInterface::ATOM),
-                ];
+                $userInfo = UserView::fromUser($user);
             }
         }
     } catch (SessionNotFoundException) {

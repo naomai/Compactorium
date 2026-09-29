@@ -4,6 +4,7 @@ namespace Naomai\Compactorium\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Naomai\Compactorium\Entity\User;
+use Naomai\Compactorium\Views\UserView;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,13 +55,7 @@ class AuthController extends AbstractController
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return $this->json([
-            'id'       => $user->id,
-            'email'    => $user->email,
-            'username' => $user->username,
-            'roles'    => $user->getRoles(),
-            'verified' => $user->verified,
-        ], Response::HTTP_CREATED);
+        return $this->json(UserView::fromUser($user), Response::HTTP_CREATED);
     }
 
     #[Route('/me', name: 'me', methods: ['GET'])]
@@ -73,18 +68,22 @@ class AuthController extends AbstractController
             return $this->json(['error' => 'Not authenticated.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        return $this->json([
-            'id'       => $user->id,
-            'email'    => $user->email,
-            'username' => $user->username,
-            'roles'    => $user->getRoles(),
-            'verified' => $user->verified,
-        ]);
+        return $this->json(UserView::fromUser($user));
     }
 
     #[Route('/login', name: 'api_login', methods: ['POST'])]
-    public function login(): void {}   // firewall intercepts
+    public function login(): JsonResponse {
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        return $this->json(UserView::fromUser($user));
+    } 
 
     #[Route('/logout', name: 'api_logout', methods: ['POST'])]
-    public function logout(): void {}  // firewall intercepts
+    public function logout(): JsonResponse {
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        return $this->json(UserView::fromUser($user));
+    } 
 }
