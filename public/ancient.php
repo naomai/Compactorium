@@ -14,6 +14,8 @@
         ->get('doctrine')
         ->getManager();
 
+    $appBase = $httpRequest->getBasePath();
+
     $libraryId = 0;
     $library = $em->find(Library::class, $libraryId);
 
@@ -52,17 +54,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-    <link rel="stylesheet" href="assets/common.css">
+    <link rel="stylesheet" href="<?= $appBase ?>/assets/common.css">
     <title>Compactorium</title>
 </head>
 <body class="ancient">
     <header>
         <table><tr>
-            <td id="logotype"><img 
-                src="assets/img/logotype_s.png" 
+            <td id="logotype"><img
+                src="<?= $appBase ?>/assets/img/logotype_s.png"
                 alt="Compactorium"/></td>
-            <td id="headerdeco"><img 
-                src="assets/img/barcodemonk_s.png" 
+            <td id="headerdeco"><img
+                src="<?= $appBase ?>/assets/img/barcodemonk_s.png"
                 alt="Barcode monk"/></td>
         </tr></table>
     </header>
@@ -84,7 +86,7 @@
         echo <<<TEMPLATE
                 <tr class="album albumCopy">
                     <td>
-                        <img src="api/thumbnail/front/{$copy->slug}.jpg?size=200" alt="front cover" class="cover" />
+                        <img src="<?= $appBase ?>/api/thumbnail/front/{$copy->slug}.jpg?size=200" alt="front cover" class="cover" />
                     </td>
                     <td class='albumDetails'>
                         <div class='albumTitle'>{$copy->albumTitle}</div>
@@ -101,8 +103,8 @@ TEMPLATE;
     <footer>
         <p>Your browser predates several technologies required by Compactorium. </p>
         <p>What you see is merely a reconstruction, maintained out of respect for the stubbornly undead.</p>
-        <img src="assets/img/valid-any.gif" alt="Compatible with Any Browser 0.0"/>
-        <img src="assets/img/valid-xhtml10.gif" alt="Valid XHTML 1.0"/>
+        <img src="<?= $appBase ?>/assets/img/valid-any.gif" alt="Compatible with Any Browser 0.0"/>
+        <img src="<?= $appBase ?>/assets/img/valid-xhtml10.gif" alt="Valid XHTML 1.0"/>
     </footer>
 </body>
 </html>

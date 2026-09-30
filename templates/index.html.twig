@@ -1,93 +1,12 @@
-<?php
-    namespace Naomai\Compactorium;
+{% extends 'base.html.twig' %}
 
-    use Naomai\Compactorium\Entity\Copy;
-    use Naomai\Compactorium\Entity\Library;
-    use Naomai\Compactorium\Entity\Scan;
-    use Naomai\Compactorium\Views\LibraryCopyView;
-    use Naomai\Compactorium\Views\ScanView;
-    use Naomai\Compactorium\Views\UserView;
-    use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
+{% block title %}Compactorium{% endblock %}
 
-
-    require __DIR__ . '/../bootstrap/app.php';
-
-    // First-run onboarding: redirect to the setup page while the admin's password is unset.
-    $setupNeeded = $kernel->getContainer()->get(\Naomai\Compactorium\Security\AdminSetupChecker::class)->needsSetup();
-    if ($setupNeeded) {
-        $appBaseUrl = rtrim($httpRequest->getBaseUrl(), '/');
-        header('Location: ' . $appBaseUrl . '/setup');
-        exit;
-    }
-
-    $userInfo = null;
-    
-    // Session must be available so json_login's cookie is readable on reload.
-    try {
-        $httpRequest->getSession();
-
-        $tokenStorage = $kernel->getContainer()->get('app.token_storage');
-        $token = $tokenStorage->getToken();
-
-        if ($token !== null) {
-            $user = $token->getUser();
-            if ($user instanceof \Naomai\Compactorium\Entity\User) {
-                $userInfo = UserView::fromUser($user);
-            }
-        }
-    } catch (SessionNotFoundException) {
-    }
-
-    $em = $kernel
-        ->getContainer()
-        ->get('doctrine')
-        ->getManager();
-
-    $libraryId = 0;
-    $library = $em->find(Library::class, $libraryId);
-
-    $copies = array_values(array_filter(
-        $em->getRepository(Copy::class)->findBy(
-            ['library'=>$library],
-            ['id'=>'DESC']
-        ),
-        fn($copy) => $copy->album !== null
-    ));
-
-    $libraryContents = array_map(
-        fn($copy)=>LibraryCopyView::fromCopy($copy), 
-        $copies
-    );
-
-
-    $scans = $em->getRepository(Scan::class)->findBy(
-        ['library'=>$library],
-        ['id'=>'DESC']
-    );
-
-
-
-    $unresolvedBarcodes = array_map(
-        fn($scan)=>ScanView::fromScan($scan), 
-        array_values(array_filter($scans, fn($scan)=>
-            $scan->copy === null || $scan->copy->album === null
-        ))
-    );
-
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+{% block javascripts %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!--[if lte IE 7]>
-    <meta http-equiv="refresh" content="0;url=./ancient.php" />
+    <meta http-equiv="refresh" content="0;url={{ app.request.basePath }}/ancient.php" />
     <![endif]-->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://unpkg.com/@zxing/library@latest"></script>
-    <link rel="stylesheet" href="assets/common.css">
-    <title>Compactorium</title>
-
     <script type="text/javascript">
         /* Redirect STUBBORNLY UNDEAD browsers to Ancient version */
 
@@ -100,15 +19,16 @@
         var html5Support = testEl2.type !== "text";
 
         if(!html5Support || !gridSupport){
-            window.location = "./ancient.php";
+            window.location = "{{ app.request.basePath }}/ancient.php";
 
         }
 
     </script>
-
     <script>
         /* LOCAL CONFIG */
         const configKey = 'compactorium-config';
+
+        window.appBasePath = {{ app.request.basePath|json_encode|raw }};
 
         function getConfig(key, defaultValue = null) {
             const config = JSON.parse(localStorage.getItem(configKey) ?? '{}');
@@ -192,7 +112,7 @@
         }
 
         async function sendBcd(bcd) {
-            const resp=await fetch("api/scan/", {
+            const resp=await fetch(window.appBasePath + "/api/scan/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -213,7 +133,7 @@
                 scan: scan.id
             });
 
-            const resp=await fetch(`api/scan/${scan.id}` , {
+            const resp=await fetch(window.appBasePath + "/api/scan/" + scan.id , {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json"
@@ -249,7 +169,7 @@
 
                 if(editor.targetScan !== null) {
                     const scanId = editor.targetScan.id
-                    const resp=await fetch(`api/scan/${scanId}` , {
+                    const resp=await fetch(window.appBasePath + "/api/scan/" + scanId , {
                         method: "PATCH",
                         headers: {
                             "Content-Type": "application/json"
@@ -269,7 +189,7 @@
                     if(editor.targetCopy !== null) {
                         const copyId = editor.targetCopy.id
 
-                        resp=await fetch("api/copy/" + copyId , {
+                        resp=await fetch(window.appBasePath + "/api/copy/" + copyId , {
                             method: "PATCH",
                             headers: {
                                 "Content-Type": "application/json"
@@ -279,7 +199,7 @@
                     } else {
                         request.library = store.libraryId;
 
-                        resp=await fetch("api/copy/" , {
+                        resp=await fetch(window.appBasePath + "/api/copy/" , {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json"
@@ -304,8 +224,6 @@
             }
         }
 
-
-
         function reloadView() {
             const viewId = getConfig("libraryViewId", "artist");
             const showGroupSeparators = getConfig("libraryViewShowGroupSeparators", false);
@@ -322,7 +240,7 @@
         function fullReload() {
             store.unresolved = [];
             store.library = [];
-            fetch(`api/scan/?type=unresolved&library=${store.libraryId}`, 
+            fetch(window.appBasePath + "/api/scan/?type=unresolved&library=" + store.libraryId, 
                 {
                     method: "GET",
                 })
@@ -333,7 +251,7 @@
                 }
             );
 
-            fetch("api/library/" + store.libraryId, 
+            fetch(window.appBasePath + "/api/library/" + store.libraryId, 
                 {
                     method: "GET",
                 })
@@ -595,7 +513,7 @@
                 return;
             }
 
-            fetch('api/login', {
+            fetch(window.appBasePath + "/api/login", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ login, password }),
@@ -618,11 +536,11 @@
         import { reactive, createApp } from 'https://esm.sh/pocket-vue'
 
         store = reactive({
-            library: <?=json_encode($libraryContents)?>,
-            unresolved: <?=json_encode($unresolvedBarcodes)?>,
+            library: {{ libraryContents|json_encode|raw }},
+            unresolved: {{ unresolvedBarcodes|json_encode|raw }},
             libraryView: [],
-            libraryId: <?=(int)$libraryId ?>,
-            userInfo: <?=json_encode($userInfo)?>,
+            libraryId: {{ libraryId }},
+            userInfo: {{ userInfo|json_encode|raw }},
         });
 
         editors = reactive({
@@ -638,58 +556,23 @@
             }
         })
 
-        createApp({store, editors}).mount();
+        createApp({store, editors, $delimiters: ['[[', ']]']}).mount();
     </script>
-</head>
-<body>
-    <header>
-        <div id="logotype"><img 
-            src="assets/img/logotype.png" 
-            srcset="assets/img/logotype.png 640w, assets/img/logotype_s.png 450w"
-            sizes="(width <= 800px) 450px, 640px"
-            alt="Compactorium"/></div>
-        <div id="headerdeco"><img 
-            src="assets/img/barcodemonk.png" 
-            srcset="assets/img/barcodemonk.png 273w, assets/img/barcodemonk_s.png 190w"
-            sizes="(width <= 800px) 190px, 273px"
-            alt="Barcode monk"/></div>
-    </header>
-    <nav id="mobileActionPanel">
-        <button id='mobileSidebarOpenBtn'>Menu</button>
-    </nav>
-    <nav id="actualMenu">
-        <div class="sidebar panel">
-            <h2 class='panelTitle'>Menu</h2>
-            <button id='mobileSidebarCloseBtn'>⨉</button>
+{% endblock %}
 
-        </div>
+{% block body %}
 
-        <div class="sidebar panel">
-            <h2 class='panelTitle'>Account</h2>
-            <?php if ($userInfo?->id !== null): ?>
-                <p>Signed in as <strong><?=htmlspecialchars($userInfo->username)?></strong></p>
-            <?php else: ?>
-            <form id="signinForm">
-                <label for='signinLogin'>Login (email or username)</label>
-                <input name="signinLogin" id='signinLoginTxt' type="text" />
-                <label for='signinPassword'>Password</label>
-                <input name="signinPassword" id='signinPasswordTxt' type="password" />
-                <div id="signinError"></div>
-                <input type="submit" value="Sign in" id="signInSubmit" />
-            </form>
-            <?php endif; ?>
-        </div>
-    </nav>
+
     <main>
         <div class="content panel">
             <h2 class='panelTitle'>Collection</h2>
             <div class="panelActionBar">
-                <button id='scannerOpenBtn' class='iconBtn'><img src="assets/img/action_addbcd.png" alt="Open scanner"/></button>
-                <button id='manualAddOpenBtn' class='iconBtn'><img src="assets/img/action_addlink.png" alt="Manual add"/></button>
+                <button id='scannerOpenBtn' class='iconBtn'><img src="{{ asset('img/action_addbcd.png') }}" alt="Open scanner"/></button>
+                <button id='manualAddOpenBtn' class='iconBtn'><img src="{{ asset('img/action_addlink.png') }}" alt="Manual add"/></button>
             </div>
             <div id="groupedList" v-scope>
                 <div v-for="group in store.libraryView" class="copyGroup">
-                    <h3 v-if="group.key !== '#'">{{group.key}}</h3>
+                    <h3 v-if="group.key !== '#'">[[group.key]]</h3>
                     <div class="copyGroupAlbumList">
                         <div v-for="copy in group.items"  v-scope="ListViewCopy(copy)" class="album albumCopy"></div>
                     </div>
@@ -707,7 +590,46 @@
         </div>
 
     </main>
+    
 
+    <template id="tplAlbumPlaceholderBarcode">
+        [[scan.barcode]] [[formatIsoDate(scan.scanned_at)]]
+    </template>
+
+    <template id="tplAlbumPlaceholderDisambig">
+        <div class="scanDate">[[formatIsoDate(scan.scanned_at)]]</div>
+        <div class="scanBcd">[[scan.barcode]]</div>
+        <div class="disambigCovers">
+            <div v-for="album in scan.copy.disambiguation.albums.slice(0, 4)" class="disambigPreview">
+                <img :src="`${window.appBasePath}/api/thumbnail/front/${album.slug}.webp?size=${50*dpiAdjust}`" :alt="`[${album.artist} - ${album.title}]`" class='cover' />
+            </div>
+            <div v-if="scan.copy.disambiguation.albums.length > 4" class="disambigPreview moreCounter"> +[[scan.copy.disambiguation.albums.length-4]]</div>
+        </div>
+    </template>
+
+    <template id="tplAlbumCopy">
+
+        <img :src="`${window.appBasePath}/api/thumbnail/front/${album.slug}.webp?size=${200*dpiAdjust}`" alt="front cover" class="cover" />
+        <div class='albumDetails'>
+            <div class='albumTitle'>[[album.title]]</div>
+            <div class='albumArtist'>[[formatArtistName(album.artist)]] [ [[album.year]] ]</div>
+        </div>
+
+    </template>
+
+    <template id="tplDisambigAlbum">
+        <label class='disambigItem'>
+            <div v-scope="ListViewAlbum(album)" class="album albumCopy"></div>
+            <input type="radio" name="disambigAlbumSelection" :value="album.slug" class="disambigCheckbox" v-model="disambig.albumSelection" />
+        </label>
+    </template>
+
+    <template id="tplEmpty">
+    </template>
+
+{% endblock %}
+
+{% block dialogs %}
     <dialog id="scannerUi" class="popup">
         <div class='dialogHeader'>
             <button class="dialogClose dialogCtl">⨉</button>
@@ -738,7 +660,7 @@
             <label for="manualAddUrl">Discogs URL</label> <input type="url" name="manualAddUrl" id="manualAddUrlInput" autofocus v-model="editor.url"/>
         </div>
 
-        <div id="manualAddError">{{editor.error}}</div>
+        <div id="manualAddError">[[editor.error]]</div>
         <div class="dialogActionBar">
             <button :disabled="editor.url==''" @click="manualAddSubmit(editor)">OK</button>
         </div>
@@ -759,41 +681,6 @@
 
         </div>
     </dialog>
+{% endblock %}
 
-    <template id="tplAlbumPlaceholderBarcode">
-        {{scan.barcode}} {{formatIsoDate(scan.scanned_at)}}
-    </template>
 
-    <template id="tplAlbumPlaceholderDisambig">
-        <div class="scanDate">{{formatIsoDate(scan.scanned_at)}}</div>
-        <div class="scanBcd">{{scan.barcode}}</div>
-        <div class="disambigCovers">
-            <div v-for="album in scan.copy.disambiguation.albums.slice(0, 4)" class="disambigPreview">
-                <img :src="`api/thumbnail/front/${album.slug}.webp?size=${50*dpiAdjust}`" :alt="`[${album.artist} - ${album.title}]`" class='cover' />
-            </div>
-            <div v-if="scan.copy.disambiguation.albums.length > 4" class="disambigPreview moreCounter"> +{{scan.copy.disambiguation.albums.length-4}}</div>
-        </div>
-    </template>
-
-    <template id="tplAlbumCopy">
-
-        <img :src="`api/thumbnail/front/${album.slug}.webp?size=${200*dpiAdjust}`" alt="front cover" class="cover" />
-        <div class='albumDetails'>
-            <div class='albumTitle'>{{album.title}}</div>
-            <div class='albumArtist'>{{formatArtistName(album.artist)}} [{{album.year}}]</div>
-        </div>
-
-    </template>
-
-    <template id="tplDisambigAlbum">
-        <label class='disambigItem'>
-            <div v-scope="ListViewAlbum(album)" class="album albumCopy"></div>
-            <input type="radio" name="disambigAlbumSelection" :value="album.slug" class="disambigCheckbox" v-model="disambig.albumSelection" />
-        </label>
-    </template>
-
-    <template id="tplEmpty">
-    </template>
-
-</body>
-</html>

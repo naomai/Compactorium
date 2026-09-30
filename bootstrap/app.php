@@ -3,12 +3,25 @@
 namespace Naomai\Compactorium;
 
 use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\HttpFoundation\Request;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 (new Dotenv())->bootEnv(dirname(__DIR__) . '/.env');
 $kernel = new Kernel($_ENV['APP_ENV'], (bool) $_ENV['APP_DEBUG']);
 $kernel->boot();
+
+/** @var Request $httpRequest */
+$httpRequest = Request::createFromGlobals();
+
+$session = $kernel
+    ->getContainer()
+    ->get('app.session_factory')
+    ->createSession();
+
+$httpRequest->setSession($session);
+
+$session->start();
 
 LegacyDotEnv::init();
 Logger::init();

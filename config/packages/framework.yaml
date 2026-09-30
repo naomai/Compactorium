@@ -7,6 +7,8 @@ framework:
 
     #esi: true
     #fragments: true
+    assets:
+        base_path: '/assets'
 
 when@test:
     framework:

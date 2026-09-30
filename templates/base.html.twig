@@ -2,8 +2,11 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="stylesheet" href="assets/common.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Compactorium{% endblock %}</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/@zxing/library@latest"></script>
+        <link rel="stylesheet" href="{{ asset('common.css') }}">
         {% block stylesheets %}
         {% endblock %}
 
@@ -18,11 +21,49 @@
         {% endif %}
     </head>
     <body>
-        <nav>
-        {% block nav %}{% endblock %}
+        <header>
+            <div id="logotype"><img 
+                src="{{ asset('img/logotype.png') }}"
+                srcset="{{ asset('img/logotype.png') }} 640w, {{ asset('img/logotype_s.png') }} 450w"
+                sizes="(width <= 800px) 450px, 640px"
+                alt="Compactorium"/></div>
+            <div id="headerdeco"><img 
+                src="{{ asset('img/barcodemonk.png') }}"
+                srcset="{{ asset('img/barcodemonk.png') }} 273w, {{ asset('img/barcodemonk_s.png') }} 190w"
+                sizes="(width <= 800px) 190px, 273px"
+                alt="Barcode monk"/></div>
+        </header>
+        <nav id="mobileActionPanel">
+            <button id='mobileSidebarOpenBtn'>Menu</button>
+        </nav>
+        <nav id="actualMenu">
+            <div class="sidebar panel">
+                <h2 class='panelTitle'>Menu</h2>
+                <button id='mobileSidebarCloseBtn'>⨉</button>
+
+            </div>
+
+            <div class="sidebar panel">
+                <h2 class='panelTitle'>Account</h2>
+
+                {% if userInfo is not null and userInfo.id is not null %}
+                    <p>Signed in as <strong>{{ userInfo.username }}</strong></p>
+                {% else %}
+                    <form id="signinForm">
+                        <label for='signinLogin'>Login (email or username)</label>
+                        <input name="signinLogin" id='signinLoginTxt' type="text" />
+                        <label for='signinPassword'>Password</label>
+                        <input name="signinPassword" id='signinPasswordTxt' type="password" />
+                        <div id="signinError"></div>
+                        <input type="submit" value="Sign in" id="signInSubmit" />
+                    </form>
+                {% endif %}
+            </div>
         </nav>
         <main>
         {% block body %}{% endblock %}
         </main>
+
+        {% block dialogs %}{% endblock %}
     </body>
 </html>

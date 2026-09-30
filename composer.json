@@ -12,7 +12,8 @@
         "doctrine/orm": "^3.7",
         "symfony/dotenv": "^8.1",
         "symfony/http-foundation": "^8.1",
-        "symfony/twig-bundle": "^8.1"
+        "symfony/twig-bundle": "^8.1",
+        "symfony/asset": "^8.1"
     },
     "autoload": {
         "psr-4": {
