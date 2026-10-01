@@ -86,7 +86,7 @@
         echo <<<TEMPLATE
                 <tr class="album albumCopy">
                     <td>
-                        <img src="<?= $appBase ?>/api/thumbnail/front/{$copy->slug}.jpg?size=200" alt="front cover" class="cover" />
+                        <img src="{$appBase}/api/thumbnail/front/{$copy->slug}.jpg?size=200" alt="front cover" class="cover" />
                     </td>
                     <td class='albumDetails'>
                         <div class='albumTitle'>{$copy->albumTitle}</div>
