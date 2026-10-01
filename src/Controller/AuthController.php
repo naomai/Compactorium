@@ -11,8 +11,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
-#[Route('/api', name: 'auth_')]
+#[Route('/api', name: 'api_')]
 class AuthController extends AbstractController
 {
     public function __construct(
@@ -71,15 +72,12 @@ class AuthController extends AbstractController
         return $this->json(UserView::fromUser($user));
     }
 
-    #[Route('/login', name: 'api_login', methods: ['POST'])]
-    public function login(): JsonResponse {
-        /** @var User|null $user */
-        $user = $this->getUser();
-
+    #[Route('/login', name: 'auth_login', methods: ['POST'])]
+    public function login(#[CurrentUser] ?User $user): JsonResponse {
         return $this->json(UserView::fromUser($user));
     } 
 
-    #[Route('/logout', name: 'api_logout', methods: ['POST'])]
+    #[Route('/logout', name: 'auth_logout', methods: ['POST'])]
     public function logout(): JsonResponse {
         /** @var User|null $user */
         $user = $this->getUser();

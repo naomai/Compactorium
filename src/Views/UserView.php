@@ -11,7 +11,11 @@ class UserView {
     public array $roles;
     public bool $verified;
 
-    public static function fromUser(User $user) : self {
+    public static function fromUser(?User $user) : ?self {
+        if($user === null) {
+            return null;
+        }
+
         $view = new self();
 
         $view->id       = $user->id;
