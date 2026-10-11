@@ -35,7 +35,7 @@
                 
                 $copyObj = new Copy();
                 $copyObj->library = $library;
-                $copyObj->ownerId = $bcd->ownerId;
+                $copyObj->owner = $bcd->owner;
                 $copyObj->scan = $bcd;
                 $copyObj->createdAt = new DateTimeImmutable();
 
