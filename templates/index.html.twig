@@ -567,8 +567,10 @@
         <div class="content panel">
             <h2 class='panelTitle'>Collection</h2>
             <div class="panelActionBar">
+                {% if userInfo is not null and userInfo.id is not null %}
                 <button id='scannerOpenBtn' class='iconBtn'><img src="{{ asset('img/action_addbcd.png') }}" alt="Open scanner"/></button>
                 <button id='manualAddOpenBtn' class='iconBtn'><img src="{{ asset('img/action_addlink.png') }}" alt="Manual add"/></button>
+                {% endif %}
             </div>
             <div id="groupedList" v-scope>
                 <div v-for="group in store.libraryView" class="copyGroup">
