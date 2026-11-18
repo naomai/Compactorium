@@ -1,6 +1,7 @@
 <?php
 namespace Naomai\Compactorium\Services;
 
+use Exception;
 use Naomai\Compactorium\Logger;
 use Naomai\Compactorium\Slugger;
 
@@ -10,8 +11,12 @@ class CoverArtArchive {
     }
     
     public static function getFrontCover(string $artist, string $title) : ?string {
-        $album = MusicBrainz::SearchAlbum("artistname:\"{$artist}\" release:\"{$title}\"");
-        return self::getReleaseFrontCover($album->rawJson['mb']);
+        try{
+            $album = MusicBrainz::SearchAlbum("artistname:\"{$artist}\" release:\"{$title}\"");
+            return self::getReleaseFrontCover($album->rawJson['mb']);
+        } catch(Exception $e) {
+            return null;
+        }
     }
 
     public static function getReleaseFrontCover(object $mbReleaseData) : ?string {

@@ -59,7 +59,7 @@ class CoverArtStore {
         
     }
 
-    public static function downloadCover(string $artist, string $title, string $url, ?HttpClient $client = null) {
+    public static function downloadCover(string $artist, string $title, string $url, ?HttpClient $client = null, array $headers=[]) {
         $slug = Slugger::slugFromArtistAndAlbum($artist, $title);
         if($client===null) {
             $client = self::$client;
@@ -67,7 +67,7 @@ class CoverArtStore {
 
         Logger::debug("CoverArtStore", "downloading front cover : {$slug}");
 
-        $frontFile = $client->downloadFile($url); 
+        $frontFile = $client->downloadFile($url, $headers); 
 
         if($frontFile === null) {
             return null;

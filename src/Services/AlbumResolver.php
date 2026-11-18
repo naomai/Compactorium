@@ -108,7 +108,7 @@ class AlbumResolver {
     private static function rawJsonFromDiscogsMasterData(object $master) : object {
         $title = $master->title;
         $artist = $master->artists[0]->name;
-        $mbData = MusicBrainz::SearchAlbum("artistname:\"{$artist}\" release:\"{$title}\"");
+        $mbData = null; //MusicBrainz::SearchAlbum("artistname:\"{$artist}\" release:\"{$title}\"");
         $alb = (object) [
             'artist'=>$artist,
             'title'=>$title,
@@ -136,10 +136,12 @@ class AlbumResolver {
         if(isset($album->rawJson->discogs->images[0])) {
             return Discogs::getFrontCover((object)$album->rawJson->discogs);
         }
-        if(isset($album->rawJson->mb->releaseInfo)) {
+        /*if(isset($album->rawJson->mb->releaseInfo)) {
             return CoverArtArchive::getReleaseFrontCover((object)$album->rawJson->mb);
         }
-        return null;
+        return null;*/
+
+        return CoverArtArchive::getFrontCover($album->artist, $album->title);
     }
 
     /**
