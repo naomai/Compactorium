@@ -16,7 +16,7 @@ class Discogs {
     public static function init() : void {
         $client = new CurlClient();
         $client->rateLimiter = new RateLimiter(
-            delay: 1,
+            delay: 0.5,
             backoffDelay: 10,
             httpRemainingHeader: "x-discogs-ratelimit-remaining",
             httpTooManyRequestsCode: 429
@@ -42,9 +42,7 @@ class Discogs {
         Logger::debug("Discogs", "SearchBarcode url: {$url}");
 
         $headers = [];
-        if(isset($_ENV['DISCOGS_KEY']) && isset($_ENV['DISCOGS_SECRET'])) {
-            $headers['Authorization'] = "Discogs key={$_ENV['DISCOGS_KEY']}, secret={$_ENV['DISCOGS_SECRET']}";
-        }
+        self::appendAuthHeader($headers);
 
         $search = self::$client->getJson($url, $headers);
 
@@ -98,7 +96,9 @@ class Discogs {
             throw new InvalidArgumentException("Provided Discogs URL is invalid");
         }
 
-        $master = self::$client->getJson($apiUrl);
+        $headers = [];
+        self::appendAuthHeader($headers);
+        $master = self::$client->getJson($apiUrl, headers: $headers);
 
         return self::validateRelease($master);
     }
@@ -141,7 +141,14 @@ class Discogs {
 
         $imageUrl = $discogsAlbum->images[0]->{'resource_url'};
 
-        return CoverArtStore::downloadCover($artist, $title, $imageUrl, client: self::$client);
+        $headers = [];
+        self::appendAuthHeader($headers);
+
+        return CoverArtStore::downloadCover(
+            $artist, $title, $imageUrl, 
+            client: self::$client,
+            headers: $headers
+        );
 
         
     }
@@ -206,5 +213,11 @@ class Discogs {
         return $apiUrl;
 
 
+    }
+
+    private static function appendAuthHeader(?array &$headers) : void {
+        if(isset($_ENV['DISCOGS_KEY']) && isset($_ENV['DISCOGS_SECRET'])) {
+            $headers['Authorization'] = "Discogs key={$_ENV['DISCOGS_KEY']}, secret={$_ENV['DISCOGS_SECRET']}";
+        }
     }
 }
