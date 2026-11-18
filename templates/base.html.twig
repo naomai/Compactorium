@@ -13,6 +13,33 @@
         {% block javascripts %}
         {% endblock %}
 
+        <script type="module">
+            import { reactive, createApp } from 'https://esm.sh/pocket-vue'
+
+            store = reactive({
+                library: {{ libraryContents|json_encode|raw }},
+                unresolved: {{ unresolvedBarcodes|json_encode|raw }},
+                libraryView: [],
+                libraryId: {{ libraryId }},
+                userInfo: {{ userInfo|json_encode|raw }},
+            });
+
+            editors = reactive({
+                disambig: {
+                    scan: null,
+                    albumSelection: null
+                },
+                manualAdd: {
+                    targetCopy: null,
+                    targetScan: null,
+                    url: "",
+                    error: "",
+                }
+            })
+
+            createApp({store, editors, $delimiters: ['[[', ']]']}).mount();
+        </script>
+
         {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
         {% if frankenphp_hot_reload %}
         <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
@@ -48,6 +75,9 @@
 
                 {% if userInfo is not null and userInfo.id is not null %}
                     <p>Signed in as <strong>{{ userInfo.username }}</strong></p>
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <p><a href="{{ path('admin_panel') }}">Admin panel</a></p>
+                    {% endif %}
                 {% else %}
                     <form id="signinForm">
                         <label for='signinLogin'>Login (email or username)</label>

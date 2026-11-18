@@ -532,32 +532,7 @@
         }
         
     </script>
-    <script type="module">
-        import { reactive, createApp } from 'https://esm.sh/pocket-vue'
 
-        store = reactive({
-            library: {{ libraryContents|json_encode|raw }},
-            unresolved: {{ unresolvedBarcodes|json_encode|raw }},
-            libraryView: [],
-            libraryId: {{ libraryId }},
-            userInfo: {{ userInfo|json_encode|raw }},
-        });
-
-        editors = reactive({
-            disambig: {
-                scan: null,
-                albumSelection: null
-            },
-            manualAdd: {
-                targetCopy: null,
-                targetScan: null,
-                url: "",
-                error: "",
-            }
-        })
-
-        createApp({store, editors, $delimiters: ['[[', ']]']}).mount();
-    </script>
 {% endblock %}
 
 {% block body %}
