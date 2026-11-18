@@ -23,7 +23,7 @@
 
             $bcds = self::getPendingBarcodes();
 
-            Logger::debug("ReleaseSyncWorker", "pending barcodes: ".count($bcds));
+            //Logger::debug("ReleaseSyncWorker", "pending barcodes: ".count($bcds));
 
             $tasksDone = 0;
 
